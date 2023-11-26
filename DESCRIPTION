@@ -1,0 +1,18 @@
+Package: ASMK
+Title: Accelerated Spatial Meta-Kriging (ASMK)
+Version: 0.0.0.9000
+Authors@R: 
+    person("Luca", "Presicce", , "l.presicce@campus.unimib.it", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0005-7062-3523"))
+Description: "Accelerated Meta-Kriging for massive Spatial dataset" by Luca Presicce and Sudipto Banerjee. This package provide the principal functions to perform accelerated meta-kriging.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Imports: 
+    Rcpp
+Depends: 
+    CVXR
