@@ -7,20 +7,20 @@
 BPS_post_draws_latent(data, priors, coords, hyperpar, W, R)
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{...}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{coords}{...}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 
-\item{W}{...}
+\item{W}{\link{matrix} set of stacking weights}
 
-\item{R}{...}
+\item{R}{\link{integer} number of desired samples}
 }
 \value{
-...
+\link{list} BPS posterior samples
 }
 \description{
 Compute the BPS posterior samples given a set of stacking weights

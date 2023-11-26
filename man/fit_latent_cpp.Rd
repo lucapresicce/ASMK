@@ -7,16 +7,16 @@
 fit_latent_cpp(data, priors, coords, hyperpar)
 }
 \arguments{
-\item{data}{two dimensional list: first named "Y", second named "X"}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{list with the priors: named "mu_B", "V_r", "a", "b"}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{coords}{matrix of sample coordinates for X and Y}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{two dimensional list: first named "delta", second named "phi"}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 }
 \value{
-list of posterior update parameters
+\link{list} posterior update parameters
 }
 \description{
 Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)

@@ -7,18 +7,18 @@
 models_dens2(data, priors, coords, hyperpar, K = 10L)
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{...}
+\item{priors}{\link{list} priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}}
 
-\item{coords}{...}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\delta}, second named\eqn{\phi}}
 
-\item{K}{...}
+\item{K}{\link{integer} number of folds}
 }
 \value{
-matrix of posterior predictive density evaluations, each columns represent a different model
+\link{matrix} posterior predictive density evaluations (each columns represent a different model)
 }
 \description{
 Return the CV predictive density evaluations for all the model combinations

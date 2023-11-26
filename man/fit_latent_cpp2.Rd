@@ -7,16 +7,16 @@
 fit_latent_cpp2(data, priors, dist, hyperpar)
 }
 \arguments{
-\item{data}{two dimensional list: first named "Y", second named "X"}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{list with the priors: named "mu_B", "V_r", "a", "b"}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{hyperpar}{two dimensional list: first named "delta", second named "phi"}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 
-\item{coords}{matrix of sample coordinates for X and Y}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 }
 \value{
-list of posterior update parameters
+\link{list} posterior update parameters
 }
 \description{
 The same fit_latent_cpp, but take as argument the distance matrix directly (does not compute it by itself from coords)

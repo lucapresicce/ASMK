@@ -7,22 +7,22 @@
 r_pred_cpp(data, X_u, Rphi_s, d_u, d_us, hyperpar, poster)
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{X_u}{...}
+\item{X_u}{\link{matrix} unobserved instances covariate matrix}
 
-\item{Rphi_s}{...}
+\item{Rphi_s}{\link{matrix} correlation matrix of sample instances}
 
-\item{d_u}{...}
+\item{d_u}{\link{matrix} unobserved instances distance matrix}
 
-\item{d_us}{...}
+\item{d_us}{\link{matrix} cross-distance between unobserved and observed instances matrix}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\delta}, second named\eqn{\phi}}
 
-\item{poster}{...}
+\item{poster}{\link{list} output from \code{fit_cpp} function}
 }
 \value{
-list of posterior predictive samples
+\link{list} posterior predictive samples
 }
 \description{
 Draw from the conditional posterior predictive for a set of unobserved covariates

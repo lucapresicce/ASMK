@@ -7,18 +7,18 @@
 dens_kcv_latent(data, priors, coords, hyperpar, K)
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{...}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{coords}{...}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 
-\item{K}{...}
+\item{K}{\link{integer} number of folds}
 }
 \value{
-vec of posterior predictive density evaluations
+\link{vector} posterior predictive density evaluations
 }
 \description{
 Compute the KCV of the density evaluations for fixed values of the hyperparameters

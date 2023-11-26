@@ -7,20 +7,20 @@
 models_dens_latent(data, priors, coords, hyperpar, useKCV, K = 10L)
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{priors}{...}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{coords}{...}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 
-\item{useKCV}{...}
+\item{useKCV}{\link{boolean} if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})}
 
-\item{K}{...}
+\item{K}{\link{integer} number of folds}
 }
 \value{
-matrix of posterior predictive density evaluations, each columns represent a different model
+\link{matrix} posterior predictive density evaluations (each columns represent a different model)
 }
 \description{
 Return the CV predictive density evaluations for all the model combinations

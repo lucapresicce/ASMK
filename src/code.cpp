@@ -14,7 +14,7 @@ using namespace arma;
 //'
 //' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
 //'
-//' @return [matrix] distance matrix of the elements of X
+//' @return [matrix] distance matrix of the elements of \eqn{X}
 //' @export
 // [[Rcpp::export(name = "arma_dist")]]
 arma::mat arma_dist(const arma::mat & X){
@@ -79,10 +79,10 @@ arma::uvec sample_index(const int& size, const int& length, const arma::vec& p){
 
 //' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 //'
-//' @param data [list] two elements: first named "Y", second named "X"
-//' @param priors [list] priors: named "mu_B", "V_r", "a", "b"
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 //' @param coords [matrix] sample coordinates for X and Y
-//' @param hyperpar [list] two elemets: first named "delta", second named "phi"
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
 //'
 //' @return [list] posterior update parameters
 //'
@@ -169,12 +169,12 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
 
 //' Sample R draws from the posterior distributions
 //'
-//' @param poster the output from "fit_cpp" function
-//' @param R number of posterior samples
-//' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
-//' @param p if par TRUE, it specifies the column number of X
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param R [integer] number of posterior samples
+//' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+//' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 //'
-//' @return list of posterior samples
+//' @return [list] posterior samples
 //'
 // [[Rcpp::export]]
 List post_draws(const List& poster, const int& R = 50, const bool& par = false, const int& p = 1) {
@@ -215,15 +215,15 @@ List post_draws(const List& poster, const int& R = 50, const bool& par = false, 
 
 //' Draw from the conditional posterior predictive for a set of unobserved covariates
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param Rphi_s ...
-//' @param d_u ...
-//' @param d_us ...
-//' @param hyperpar ...
-//' @param poster ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param Rphi_s [matrix] correlation matrix of sample instances
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
 //'
-//' @return list of posterior predictive samples
+//' @return [list] posterior predictive samples
 //'
 // [[Rcpp::export]]
 List r_pred_cpp(const List& data, const arma::mat& X_u, const arma::mat& Rphi_s, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster) {
@@ -281,16 +281,16 @@ List r_pred_cpp(const List& data, const arma::mat& X_u, const arma::mat& Rphi_s,
 
 //' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param Y_u ...
-//' @param Rphi_s ...
-//' @param d_u ...
-//' @param d_us ...
-//' @param hyperpar ...
-//' @param poster ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param Y_u [matrix] unobserved instances response matrix
+//' @param Rphi_s [matrix] correlation matrix of sample instances
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
 //'
-//' @return vec of posterior predictive density evaluations
+//' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 arma::vec d_pred_cpp(const List& data, const arma::mat& X_u, const arma::vec& Y_u, const arma::mat& Rphi_s, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster) {
@@ -347,12 +347,12 @@ arma::vec d_pred_cpp(const List& data, const arma::mat& X_u, const arma::vec& Y_
 
 //' Compute the LOOCV of the density evaluations for fixed values of the hyperparameters
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
 //'
-//' @return vec of posterior predictive density evaluations
+//' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 arma::vec dens_loocv(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
@@ -423,13 +423,13 @@ arma::vec dens_loocv(const List& data, const List& priors, const arma::mat& coor
 
 //' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param K [integer] number of folds
 //'
-//' @return vec of posterior predictive density evaluations
+//' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K) { //, const int& seed) {
@@ -499,14 +499,14 @@ arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords
 
 //' Return the CV predictive density evaluations for all the model combinations
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param useKCV ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+//' @param K [integer] number of folds
 //'
-//' @return matrix of posterior predictive density evaluations, each columns represent a different model
+//' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //'
 // [[Rcpp::export]]
 arma::mat models_dens(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const bool& useKCV, const int& K = 10) {
@@ -547,13 +547,13 @@ arma::mat models_dens(const List& data, const List& priors, const arma::mat& coo
 
 //' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param K [integer] number of folds
 //'
-//' @return list of posterior predictive density evaluations
+//' @return [list] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 List dens_kcv2(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K) { //, const int& seed) {
@@ -639,13 +639,13 @@ List dens_kcv2(const List& data, const List& priors, const arma::mat& coords, co
 
 //' Return the CV predictive density evaluations for all the model combinations
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param K [integer] number of folds
 //'
-//' @return matrix of posterior predictive density evaluations, each columns represent a different model
+//' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //'
 // [[Rcpp::export]]
 List models_dens2(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K = 10) {
@@ -693,16 +693,16 @@ List models_dens2(const List& data, const List& priors, const arma::mat& coords,
 
 //' Compute the BPS spatial prediction given a set of stacking weights
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param priors ...
-//' @param coords ...
-//' @param crd_u ...
-//' @param hyperpar ...
-//' @param W ...
-//' @param R ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
 //'
-//' @return list of BPS posterior predictive samples
+//' @return [list] BPS posterior predictive samples
 //' @export
 // [[Rcpp::export]]
 List BPS_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
@@ -762,14 +762,14 @@ List BPS_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const Lis
 
 //' Compute the BPS posterior samples given a set of stacking weights
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param W ...
-//' @param R ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
 //'
-//' @return ...
+//' @return [matrix] BPS posterior samples
 //' @export
 // [[Rcpp::export]]
 arma::mat BPS_post_draws(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const arma::vec& W, const int& R) {
@@ -829,12 +829,12 @@ arma::mat BPS_post_draws(const List& data, const List& priors, const arma::mat& 
 
 //' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 //'
-//' @param data two dimensional list: first named "Y", second named "X"
-//' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
-//' @param coords matrix of sample coordinates for X and Y
-//' @param hyperpar two dimensional list: first named "delta", second named "phi"
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
 //'
-//' @return list of posterior update parameters
+//' @return [list] posterior update parameters
 //'
 // [[Rcpp::export]]
 List fit_latent_cpp(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
@@ -890,12 +890,12 @@ List fit_latent_cpp(const List& data, const List& priors, const arma::mat& coord
 
 //' The same fit_latent_cpp, but take as argument the distance matrix directly (does not compute it by itself from coords)
 //'
-//' @param data two dimensional list: first named "Y", second named "X"
-//' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
-//' @param coords matrix of sample coordinates for X and Y
-//' @param hyperpar two dimensional list: first named "delta", second named "phi"
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
 //'
-//' @return list of posterior update parameters
+//' @return [list] posterior update parameters
 //'
 // [[Rcpp::export]]
 List fit_latent_cpp2(const List& data, const List& priors, const arma::mat& dist, const List& hyperpar) {
@@ -950,12 +950,12 @@ List fit_latent_cpp2(const List& data, const List& priors, const arma::mat& dist
 
 //' Sample R draws from the posterior distributions
 //'
-//' @param poster the output from "fit_cpp" function
-//' @param R number of posterior samples
-//' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
-//' @param p if par TRUE, it specifies the column number of X
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param R [integer] number of posterior samples
+//' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+//' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 //'
-//' @return list of posterior samples
+//' @return [list] posterior samples
 //'
 // [[Rcpp::export]]
 List post_draws_latent(const List& poster, const int& R = 50, const bool& par = false, const int& p = 2) {
@@ -998,14 +998,14 @@ List post_draws_latent(const List& poster, const int& R = 50, const bool& par = 
 
 //' Compute the BPS posterior samples given a set of stacking weights
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param W ...
-//' @param R ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
 //'
-//' @return ...
+//' @return [list] BPS posterior samples
 //' @export
 // [[Rcpp::export]]
 List BPS_post_draws_latent(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const arma::vec& W, const int& R) {
@@ -1056,16 +1056,16 @@ List BPS_post_draws_latent(const List& data, const List& priors, const arma::mat
 
 //' Draw from the conditional posterior predictive for a set of unobserved covariates
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param d_u ...
-//' @param d_us ...
-//' @param hyperpar ...
-//' @param poster ...
-//' @param beta ...
-//' @param sigma ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param beta [matrix] posterior sample for \eqn{\beta}
+//' @param sigma [matrix] posterior sample for \eqn{\Sigma}
 //'
-//' @return list of posterior predictive samples
+//' @return [list] posterior predictive samples
 //'
 // [[Rcpp::export]]
 List r_pred_latent_cpp(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const arma::mat& beta, const arma::mat& sigma) {
@@ -1114,17 +1114,17 @@ List r_pred_latent_cpp(const List& data, const arma::mat& X_u, const arma::mat& 
 
 //' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param Y_u ...
-//' @param d_u ...
-//' @param d_us ...
-//' @param hyperpar ...
-//' @param poster ...
-//' @param beta ...
-//' @param sigma ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param Y_u [matrix] unobserved instances response matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param beta [matrix] posterior sample for \eqn{\beta}
+//' @param sigma [matrix] posterior sample for \eqn{\Sigma}
 //'
-//' @return posterior predictive density evaluation (double)
+//' @return [double] posterior predictive density evaluation
 //'
 // [[Rcpp::export]]
 double d_pred_latent_cpp(const List& data, const arma::mat& X_u, const arma::mat& Y_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const arma::mat& beta, const arma::mat& sigma) {
@@ -1172,12 +1172,12 @@ double d_pred_latent_cpp(const List& data, const arma::mat& X_u, const arma::mat
 
 //' Compute the LOOCV of the density evaluations for fixed values of the hyperparameters
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
 //'
-//' @return vec of posterior predictive density evaluations
+//' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 arma::vec dens_loocv_latent(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
@@ -1250,13 +1250,13 @@ arma::vec dens_loocv_latent(const List& data, const List& priors, const arma::ma
 
 //' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param K [integer] number of folds
 //'
-//' @return vec of posterior predictive density evaluations
+//' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
 arma::vec dens_kcv_latent(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K) { //, const int& seed) {
@@ -1325,14 +1325,14 @@ arma::vec dens_kcv_latent(const List& data, const List& priors, const arma::mat&
 
 //' Return the CV predictive density evaluations for all the model combinations
 //'
-//' @param data ...
-//' @param priors ...
-//' @param coords ...
-//' @param hyperpar ...
-//' @param useKCV ...
-//' @param K ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+//' @param K [integer] number of folds
 //'
-//' @return matrix of posterior predictive density evaluations, each columns represent a different model
+//' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //'
 // [[Rcpp::export]]
 arma::mat models_dens_latent(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, bool useKCV, int K = 10) {
@@ -1373,16 +1373,16 @@ arma::mat models_dens_latent(const List& data, const List& priors, const arma::m
 
 //' Compute the BPS spatial prediction given a set of stacking weights
 //'
-//' @param data ...
-//' @param X_u ...
-//' @param priors ...
-//' @param coords ...
-//' @param crd_u ...
-//' @param hyperpar ...
-//' @param W ...
-//' @param R ...
+//' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
 //'
-//' @return list of BPS posterior predictive samples
+//' @return [list] BPS posterior predictive samples
 //' @export
 // [[Rcpp::export]]
 List BPS_latent_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {

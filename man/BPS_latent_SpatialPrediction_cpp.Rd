@@ -16,24 +16,24 @@ BPS_latent_SpatialPrediction_cpp(
 )
 }
 \arguments{
-\item{data}{...}
+\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
 
-\item{X_u}{...}
+\item{X_u}{\link{matrix} unobserved instances covariate matrix}
 
-\item{priors}{...}
+\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{coords}{...}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{crd_u}{...}
+\item{crd_u}{\link{matrix} unboserved instances coordinates}
 
-\item{hyperpar}{...}
+\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
 
-\item{W}{...}
+\item{W}{\link{matrix} set of stacking weights}
 
-\item{R}{...}
+\item{R}{\link{integer} number of desired samples}
 }
 \value{
-list of BPS posterior predictive samples
+\link{list} BPS posterior predictive samples
 }
 \description{
 Compute the BPS spatial prediction given a set of stacking weights

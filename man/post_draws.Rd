@@ -7,16 +7,16 @@
 post_draws(poster, R = 50L, par = FALSE, p = 1L)
 }
 \arguments{
-\item{poster}{the output from "fit_cpp" function}
+\item{poster}{\link{list} output from \code{fit_cpp} function}
 
-\item{R}{number of posterior samples}
+\item{R}{\link{integer} number of posterior samples}
 
-\item{par}{boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)}
+\item{par}{\link{boolean} if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)}
 
-\item{p}{if par TRUE, it specifies the column number of X}
+\item{p}{\link{integer} if \code{par = TRUE}, it specifies the column number of \eqn{X}}
 }
 \value{
-list of posterior samples
+\link{list} posterior samples
 }
 \description{
 Sample R draws from the posterior distributions
