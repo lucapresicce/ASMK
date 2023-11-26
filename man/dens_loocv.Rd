@@ -7,13 +7,13 @@
 dens_loocv(data, priors, coords, hyperpar)
 }
 \arguments{
-\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
+\item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
 
-\item{priors}{\link{list} priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}}
+\item{priors}{\link{list} priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}}
 
 \item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{\link{list} two elemets: first named\eqn{\delta}, second named\eqn{\phi}}
+\item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 }
 \value{
 \link{vector} posterior predictive density evaluations

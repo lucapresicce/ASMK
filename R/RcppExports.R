@@ -36,10 +36,10 @@ sample_index <- function(size, length, p) {
 
 #' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #'
 #' @return [list] posterior update parameters
 #'
@@ -62,12 +62,12 @@ post_draws <- function(poster, R = 50L, par = FALSE, p = 1L) {
 
 #' Draw from the conditional posterior predictive for a set of unobserved covariates
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
 #' @param Rphi_s [matrix] correlation matrix of sample instances
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
 #'
 #' @return [list] posterior predictive samples
@@ -78,13 +78,13 @@ r_pred_cpp <- function(data, X_u, Rphi_s, d_u, d_us, hyperpar, poster) {
 
 #' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
 #' @param Y_u [matrix] unobserved instances response matrix
 #' @param Rphi_s [matrix] correlation matrix of sample instances
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
 #'
 #' @return [vector] posterior predictive density evaluations
@@ -95,10 +95,10 @@ d_pred_cpp <- function(data, X_u, Y_u, Rphi_s, d_u, d_us, hyperpar, poster) {
 
 #' Compute the LOOCV of the density evaluations for fixed values of the hyperparameters
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #'
 #' @return [vector] posterior predictive density evaluations
 #'
@@ -108,10 +108,10 @@ dens_loocv <- function(data, priors, coords, hyperpar) {
 
 #' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param K [integer] number of folds
 #'
 #' @return [vector] posterior predictive density evaluations
@@ -122,10 +122,10 @@ dens_kcv <- function(data, priors, coords, hyperpar, K) {
 
 #' Return the CV predictive density evaluations for all the model combinations
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 #' @param K [integer] number of folds
 #'
@@ -137,10 +137,10 @@ models_dens <- function(data, priors, coords, hyperpar, useKCV, K = 10L) {
 
 #' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param K [integer] number of folds
 #'
 #' @return [list] posterior predictive density evaluations
@@ -151,10 +151,10 @@ dens_kcv2 <- function(data, priors, coords, hyperpar, K) {
 
 #' Return the CV predictive density evaluations for all the model combinations
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -165,12 +165,12 @@ models_dens2 <- function(data, priors, coords, hyperpar, K = 10L) {
 
 #' Compute the BPS spatial prediction given a set of stacking weights
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param crd_u [matrix] unboserved instances coordinates
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'
@@ -182,10 +182,10 @@ BPS_SpatialPrediction_cpp <- function(data, X_u, priors, coords, crd_u, hyperpar
 
 #' Compute the BPS posterior samples given a set of stacking weights
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\delta}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'
@@ -197,10 +197,10 @@ BPS_post_draws <- function(data, priors, coords, hyperpar, W, R) {
 
 #' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #'
 #' @return [list] posterior update parameters
 #'
@@ -210,10 +210,10 @@ fit_latent_cpp <- function(data, priors, coords, hyperpar) {
 
 #' The same fit_latent_cpp, but take as argument the distance matrix directly (does not compute it by itself from coords)
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #'
 #' @return [list] posterior update parameters
 #'
@@ -236,10 +236,10 @@ post_draws_latent <- function(poster, R = 50L, par = FALSE, p = 2L) {
 
 #' Compute the BPS posterior samples given a set of stacking weights
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'
@@ -251,11 +251,11 @@ BPS_post_draws_latent <- function(data, priors, coords, hyperpar, W, R) {
 
 #' Draw from the conditional posterior predictive for a set of unobserved covariates
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
 #' @param beta [matrix] posterior sample for \eqn{\beta}
 #' @param sigma [matrix] posterior sample for \eqn{\Sigma}
@@ -268,12 +268,12 @@ r_pred_latent_cpp <- function(data, X_u, d_u, d_us, hyperpar, poster, beta, sigm
 
 #' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
 #' @param Y_u [matrix] unobserved instances response matrix
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
 #' @param beta [matrix] posterior sample for \eqn{\beta}
 #' @param sigma [matrix] posterior sample for \eqn{\Sigma}
@@ -286,10 +286,10 @@ d_pred_latent_cpp <- function(data, X_u, Y_u, d_u, d_us, hyperpar, poster, beta,
 
 #' Compute the LOOCV of the density evaluations for fixed values of the hyperparameters
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #'
 #' @return [vector] posterior predictive density evaluations
 #'
@@ -299,10 +299,10 @@ dens_loocv_latent <- function(data, priors, coords, hyperpar) {
 
 #' Compute the KCV of the density evaluations for fixed values of the hyperparameters
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param K [integer] number of folds
 #'
 #' @return [vector] posterior predictive density evaluations
@@ -313,10 +313,10 @@ dens_kcv_latent <- function(data, priors, coords, hyperpar, K) {
 
 #' Return the CV predictive density evaluations for all the model combinations
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 #' @param K [integer] number of folds
 #'
@@ -328,12 +328,12 @@ models_dens_latent <- function(data, priors, coords, hyperpar, useKCV, K = 10L) 
 
 #' Compute the BPS spatial prediction given a set of stacking weights
 #'
-#' @param data [list] two elements: first named\eqn{Y}, second named\eqn{X}
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
-#' @param priors [list] priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param crd_u [matrix] unboserved instances coordinates
-#' @param hyperpar [list] two elemets: first named\eqn{\alpha}, second named\eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'

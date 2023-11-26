@@ -7,7 +7,7 @@
 r_pred_latent_cpp(data, X_u, d_u, d_us, hyperpar, poster, beta, sigma)
 }
 \arguments{
-\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
+\item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
 
 \item{X_u}{\link{matrix} unobserved instances covariate matrix}
 
@@ -15,7 +15,7 @@ r_pred_latent_cpp(data, X_u, d_u, d_us, hyperpar, poster, beta, sigma)
 
 \item{d_us}{\link{matrix} cross-distance between unobserved and observed instances matrix}
 
-\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
+\item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
 

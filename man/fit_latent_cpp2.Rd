@@ -7,11 +7,11 @@
 fit_latent_cpp2(data, priors, dist, hyperpar)
 }
 \arguments{
-\item{data}{\link{list} two elements: first named\eqn{Y}, second named\eqn{X}}
+\item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
 
-\item{priors}{\link{list} priors: named\eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
+\item{priors}{\link{list} priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{hyperpar}{\link{list} two elemets: first named\eqn{\alpha}, second named\eqn{\phi}}
+\item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 
 \item{coords}{\link{matrix} sample coordinates for X and Y}
 }
