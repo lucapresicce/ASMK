@@ -7,14 +7,14 @@
 sample_index(size, length, p)
 }
 \arguments{
-\item{size}{dimension of the set to sample}
+\item{size}{\link{integer} dimension of the set to sample}
 
-\item{length}{number of elements to sample}
+\item{length}{\link{integer} number of elements to sample}
 
-\item{p}{vector of probabilities}
+\item{p}{\link{vector} sampling probabilities}
 }
 \value{
-vector of sampled integers
+\link{vector} sample of integers
 }
 \description{
 Function to sample integers (index)

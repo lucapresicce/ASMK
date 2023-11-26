@@ -2,22 +2,22 @@
 % Please edit documentation in R/RcppExports.R
 \name{fit_cpp}
 \alias{fit_cpp}
-\title{Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)}
+\title{Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)}
 \usage{
 fit_cpp(data, priors, coords, hyperpar)
 }
 \arguments{
-\item{data}{two dimensional list: first named "Y", second named "X"}
+\item{data}{\link{list} two elements: first named "Y", second named "X"}
 
-\item{priors}{list with the priors: named "mu_B", "V_r", "a", "b"}
+\item{priors}{\link{list} priors: named "mu_B", "V_r", "a", "b"}
 
-\item{coords}{matrix of sample coordinates for X and Y}
+\item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{two dimensional list: first named "delta", second named "phi"}
+\item{hyperpar}{\link{list} two elemets: first named "delta", second named "phi"}
 }
 \value{
-list of posterior update parameters
+\link{list} posterior update parameters
 }
 \description{
-Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 }

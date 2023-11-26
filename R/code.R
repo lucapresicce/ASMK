@@ -1,15 +1,19 @@
 #' Compute the BPS stacking weights for univariate latent spatial regression model
 #'
-#' @param Y a "N \times 1" matrix of sample response variable
-#' @param X a "N \times P" matrix of sample covarites
-#' @param crd_s a "N \times 2" matrix of sample coordinates
-#' @param Delta (univariate models) a vector of candidate values for hyperparameter \delta
-#' @param Alfa (mulrivariate models) a vector of candidate values for hyperparameter \alpha
-#' @param Fi a vector of candidate values for hyperparameter \phi
-#' @param KCV a boolean flag to use K-fold cross validation instead of LOOCV (default FALSE)
-#' @param K if KCV = TRUE, represent the number of desired K-fold
+#' Implement Bayesian predictive stacking for the univariate latent spatial regression models.
 #'
-#' @return a matrix with models configuration and the associated weights, and a matrix with the stacking weights
+#' @param Y [matrix] \eqn{N \times 1} of sample response variable
+#' @param X [matrix] \eqn{N \times P} matrix of sample covarites
+#' @param crd_s [matrix] \eqn{N \times 2} matrix of sample coordinates
+#' @param Delta [vector] (univariate models) candidate values for hyperparameter \eqn{\delta}
+#' @param Alfa [vector] (mulrivariate models) candidate values for hyperparameter \eqn{\alpha}
+#' @param Fi [vector] candidate values for hyperparameter \eqn{\phi}
+#' @param KCV [boolean] flag to use K-fold cross validation instead of LOOCV (\code{default = FALSE})
+#' @param K [integer] if \code{KCV = TRUE}, represent the number of desired K-fold
+#'
+#' @return A list A list with the following components:
+#' \item{Grid}{[matrix] models configuration and the associated weights}
+#' \item{W}{[matrix] stacking weights}
 #'
 #' @importFrom CVXR Variable Maximize Problem solve
 #'
@@ -61,8 +65,6 @@ PredictiveStackingWeights_cpp <- function(Y, X, crd_s, Delta = NULL, Alfa = NULL
 
   ## solve the convex optimization problem -------------------------------------
 
-  # cat("\n Recovering the Predictive Stacking weights : \n")
-  # tic()
   # declare variable
   scores <- out
   weights <- Variable( ncol(scores) )
@@ -76,9 +78,6 @@ PredictiveStackingWeights_cpp <- function(Y, X, crd_s, Delta = NULL, Alfa = NULL
 
   # define the stacking predictive distribution obtained
   w_hat <- result$getValue(weights)
-
-  # tcop <- toc(quiet = T)
-  # message(tcop$callback_msg)
 
   ## function return
   if (q > 1) {
@@ -100,14 +99,16 @@ PredictiveStackingWeights_cpp <- function(Y, X, crd_s, Delta = NULL, Alfa = NULL
 
 #' Compute the BPS stacking weights for univariate latent spatial regression model
 #'
-#' @param Y a "N \times 1" matrix of sample response variable
-#' @param X a "N \times P" matrix of sample covarites
-#' @param crd_s a "N \times 2" matrix of sample coordinates
-#' @param Delta a vector of candidate values for hyperparameter \delta
-#' @param Fi a vector of candidate values for hyperparameter \phi
-#' @param K if KCV = TRUE, represent the number of desired K-fold
+#' @param Y [matrix] \eqn{N \times 1} of sample response variable
+#' @param X [matrix] \eqn{N \times P} matrix of sample covarites
+#' @param crd_s [matrix] \eqn{N \times 2} matrix of sample coordinates
+#' @param Delta [vector] (univariate models) candidate values for hyperparameter \eqn{\delta}
+#' @param Fi [vector] candidate values for hyperparameter \eqn{\phi}
+#' @param K [integer] if \code{KCV = TRUE}, represent the number of desired K-fold
 #'
-#' @return a matrix with models configuration and the associated weights, and a matrix with the stacking weights
+#' @return A list A list with the following components:
+#' \item{Grid}{[matrix] models configuration and the associated weights}
+#' \item{W}{[matrix] stacking weights}
 #'
 #' @importFrom CVXR Variable Maximize Problem solve
 #'
@@ -129,8 +130,6 @@ PredictiveStackingWeights_cpp2 <- function(Y, X, crd_s, Delta, Fi, K = 10) {
 
   ## solve the convex optimization problem -------------------------------------
 
-  # cat("\n Recovering the Predictive Stacking weights : \n")
-  # tic()
   # declare variable
   scores <- out$out
   weights <- Variable( ncol(scores) )
@@ -144,9 +143,6 @@ PredictiveStackingWeights_cpp2 <- function(Y, X, crd_s, Delta, Fi, K = 10) {
 
   # define the stacking predictive distribution obtained
   w_hat <- result$getValue(weights)
-
-  # tcop <- toc(quiet = T)
-  # message(tcop$callback_msg)
 
   ## function return
   grid <- expand_grid_cpp(Delta, Fi)

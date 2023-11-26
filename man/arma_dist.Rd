@@ -7,10 +7,10 @@
 arma_dist(X)
 }
 \arguments{
-\item{X}{matrix (tipically of N coordindates on \mathbb{R}^2 )}
+\item{X}{\link{matrix} (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )}
 }
 \value{
-distance matrix of the elements of X
+\link{matrix} distance matrix of the elements of X
 }
 \description{
 Compute the Euclidean distance matrix

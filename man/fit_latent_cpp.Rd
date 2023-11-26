@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{fit_latent_cpp}
 \alias{fit_latent_cpp}
-\title{Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)}
+\title{Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)}
 \usage{
 fit_latent_cpp(data, priors, coords, hyperpar)
 }
@@ -19,5 +19,5 @@ fit_latent_cpp(data, priors, coords, hyperpar)
 list of posterior update parameters
 }
 \description{
-Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 }

@@ -7,20 +7,22 @@
 PredictiveStackingWeights_cpp2(Y, X, crd_s, Delta, Fi, K = 10)
 }
 \arguments{
-\item{Y}{a "N \times 1" matrix of sample response variable}
+\item{Y}{\link{matrix} \eqn{N \times 1} of sample response variable}
 
-\item{X}{a "N \times P" matrix of sample covarites}
+\item{X}{\link{matrix} \eqn{N \times P} matrix of sample covarites}
 
-\item{crd_s}{a "N \times 2" matrix of sample coordinates}
+\item{crd_s}{\link{matrix} \eqn{N \times 2} matrix of sample coordinates}
 
-\item{Delta}{a vector of candidate values for hyperparameter \delta}
+\item{Delta}{\link{vector} (univariate models) candidate values for hyperparameter \eqn{\delta}}
 
-\item{Fi}{a vector of candidate values for hyperparameter \phi}
+\item{Fi}{\link{vector} candidate values for hyperparameter \eqn{\phi}}
 
-\item{K}{if KCV = TRUE, represent the number of desired K-fold}
+\item{K}{\link{integer} if \code{KCV = TRUE}, represent the number of desired K-fold}
 }
 \value{
-a matrix with models configuration and the associated weights, and a matrix with the stacking weights
+A list A list with the following components:
+\item{Grid}{\link{matrix} models configuration and the associated weights}
+\item{W}{\link{matrix} stacking weights}
 }
 \description{
 Compute the BPS stacking weights for univariate latent spatial regression model

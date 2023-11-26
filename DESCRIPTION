@@ -1,6 +1,6 @@
 Package: ASMK
 Title: Accelerated Spatial Meta-Kriging (ASMK)
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Luca", "Presicce", , "l.presicce@campus.unimib.it", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0005-7062-3523"))

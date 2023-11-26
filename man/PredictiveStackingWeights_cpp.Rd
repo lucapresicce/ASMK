@@ -16,25 +16,27 @@ PredictiveStackingWeights_cpp(
 )
 }
 \arguments{
-\item{Y}{a "N \times 1" matrix of sample response variable}
+\item{Y}{\link{matrix} \eqn{N \times 1} of sample response variable}
 
-\item{X}{a "N \times P" matrix of sample covarites}
+\item{X}{\link{matrix} \eqn{N \times P} matrix of sample covarites}
 
-\item{crd_s}{a "N \times 2" matrix of sample coordinates}
+\item{crd_s}{\link{matrix} \eqn{N \times 2} matrix of sample coordinates}
 
-\item{Delta}{(univariate models) a vector of candidate values for hyperparameter \delta}
+\item{Delta}{\link{vector} (univariate models) candidate values for hyperparameter \eqn{\delta}}
 
-\item{Alfa}{(mulrivariate models) a vector of candidate values for hyperparameter \alpha}
+\item{Alfa}{\link{vector} (mulrivariate models) candidate values for hyperparameter \eqn{\alpha}}
 
-\item{Fi}{a vector of candidate values for hyperparameter \phi}
+\item{Fi}{\link{vector} candidate values for hyperparameter \eqn{\phi}}
 
-\item{KCV}{a boolean flag to use K-fold cross validation instead of LOOCV (default FALSE)}
+\item{KCV}{\link{boolean} flag to use K-fold cross validation instead of LOOCV (\code{default = FALSE})}
 
-\item{K}{if KCV = TRUE, represent the number of desired K-fold}
+\item{K}{\link{integer} if \code{KCV = TRUE}, represent the number of desired K-fold}
 }
 \value{
-a matrix with models configuration and the associated weights, and a matrix with the stacking weights
+A list A list with the following components:
+\item{Grid}{\link{matrix} models configuration and the associated weights}
+\item{W}{\link{matrix} stacking weights}
 }
 \description{
-Compute the BPS stacking weights for univariate latent spatial regression model
+Implement Bayesian predictive stacking for the univariate latent spatial regression models.
 }

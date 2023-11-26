@@ -2,18 +2,18 @@
 % Please edit documentation in R/RcppExports.R
 \name{expand_grid_cpp}
 \alias{expand_grid_cpp}
-\title{Build a grid from two vector (i.e. equivalent to expand.grid() in R)}
+\title{Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})}
 \usage{
 expand_grid_cpp(x, y)
 }
 \arguments{
-\item{x}{first vector of numeric elements}
+\item{x}{\link{vector} first vector of numeric elements}
 
-\item{y}{second vector of numeric elements}
+\item{y}{\link{vector} second vector of numeric elements}
 }
 \value{
-matrix as expanded grid of combinations
+\link{matrix} expanded grid of combinations
 }
 \description{
-Build a grid from two vector (i.e. equivalent to expand.grid() in R)
+Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
 }

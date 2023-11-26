@@ -3,20 +3,20 @@
 
 #' Compute the Euclidean distance matrix
 #'
-#' @param X matrix (tipically of N coordindates on \mathbb{R}^2 )
+#' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
 #'
-#' @return distance matrix of the elements of X
+#' @return [matrix] distance matrix of the elements of X
 #' @export
 arma_dist <- function(X) {
     .Call(`_ASMK_arma_dist`, X)
 }
 
-#' Build a grid from two vector (i.e. equivalent to expand.grid() in R)
+#' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
 #'
-#' @param x first vector of numeric elements
-#' @param y second vector of numeric elements
+#' @param x [vector] first vector of numeric elements
+#' @param y [vector] second vector of numeric elements
 #'
-#' @return matrix as expanded grid of combinations
+#' @return [matrix] expanded grid of combinations
 #'
 expand_grid_cpp <- function(x, y) {
     .Call(`_ASMK_expand_grid_cpp`, x, y)
@@ -24,24 +24,24 @@ expand_grid_cpp <- function(x, y) {
 
 #' Function to sample integers (index)
 #'
-#' @param size dimension of the set to sample
-#' @param length number of elements to sample
-#' @param p vector of probabilities
+#' @param size [integer] dimension of the set to sample
+#' @param length [integer] number of elements to sample
+#' @param p [vector] sampling probabilities
 #'
-#' @return vector of sampled integers
+#' @return [vector] sample of integers
 #'
 sample_index <- function(size, length, p) {
     .Call(`_ASMK_sample_index`, size, length, p)
 }
 
-#' Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+#' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 #'
-#' @param data two dimensional list: first named "Y", second named "X"
-#' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
-#' @param coords matrix of sample coordinates for X and Y
-#' @param hyperpar two dimensional list: first named "delta", second named "phi"
+#' @param data [list] two elements: first named "Y", second named "X"
+#' @param priors [list] priors: named "mu_B", "V_r", "a", "b"
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param hyperpar [list] two elemets: first named "delta", second named "phi"
 #'
-#' @return list of posterior update parameters
+#' @return [list] posterior update parameters
 #'
 fit_cpp <- function(data, priors, coords, hyperpar) {
     .Call(`_ASMK_fit_cpp`, data, priors, coords, hyperpar)
@@ -51,7 +51,7 @@ fit_cpp <- function(data, priors, coords, hyperpar) {
 #'
 #' @param poster the output from "fit_cpp" function
 #' @param R number of posterior samples
-#' @param par boolean, if TRUE only \beta and \sigma^2 are sampled (\omega is omitted)
+#' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 #' @param p if par TRUE, it specifies the column number of X
 #'
 #' @return list of posterior samples
@@ -195,7 +195,7 @@ BPS_post_draws <- function(data, priors, coords, hyperpar, W, R) {
     .Call(`_ASMK_BPS_post_draws`, data, priors, coords, hyperpar, W, R)
 }
 
-#' Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+#' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 #'
 #' @param data two dimensional list: first named "Y", second named "X"
 #' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
@@ -225,7 +225,7 @@ fit_latent_cpp2 <- function(data, priors, dist, hyperpar) {
 #'
 #' @param poster the output from "fit_cpp" function
 #' @param R number of posterior samples
-#' @param par boolean, if TRUE only \beta and \sigma^2 are sampled (\omega is omitted)
+#' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 #' @param p if par TRUE, it specifies the column number of X
 #'
 #' @return list of posterior samples

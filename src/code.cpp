@@ -12,9 +12,9 @@ using namespace arma;
 
 //' Compute the Euclidean distance matrix
 //'
-//' @param X matrix (tipically of N coordindates on \mathbb{R}^2 )
+//' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
 //'
-//' @return distance matrix of the elements of X
+//' @return [matrix] distance matrix of the elements of X
 //' @export
 // [[Rcpp::export(name = "arma_dist")]]
 arma::mat arma_dist(const arma::mat & X){
@@ -30,12 +30,12 @@ arma::mat arma_dist(const arma::mat & X){
 }
 
 
-//' Build a grid from two vector (i.e. equivalent to expand.grid() in R)
+//' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
 //'
-//' @param x first vector of numeric elements
-//' @param y second vector of numeric elements
+//' @param x [vector] first vector of numeric elements
+//' @param y [vector] second vector of numeric elements
 //'
-//' @return matrix as expanded grid of combinations
+//' @return [matrix] expanded grid of combinations
 //'
 // [[Rcpp::export]]
 arma::mat expand_grid_cpp(const arma::vec& x, const arma::vec& y) {
@@ -60,11 +60,11 @@ arma::mat expand_grid_cpp(const arma::vec& x, const arma::vec& y) {
 
 //' Function to sample integers (index)
 //'
-//' @param size dimension of the set to sample
-//' @param length number of elements to sample
-//' @param p vector of probabilities
+//' @param size [integer] dimension of the set to sample
+//' @param length [integer] number of elements to sample
+//' @param p [vector] sampling probabilities
 //'
-//' @return vector of sampled integers
+//' @return [vector] sample of integers
 //'
 // [[Rcpp::export]]
 arma::uvec sample_index(const int& size, const int& length, const arma::vec& p){
@@ -77,14 +77,14 @@ arma::uvec sample_index(const int& size, const int& length, const arma::vec& p){
 // UNIVARIATE LATENT MODELS -----------------------------------------------------------------------
 
 
-//' Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+//' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 //'
-//' @param data two dimensional list: first named "Y", second named "X"
-//' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
-//' @param coords matrix of sample coordinates for X and Y
-//' @param hyperpar two dimensional list: first named "delta", second named "phi"
+//' @param data [list] two elements: first named "Y", second named "X"
+//' @param priors [list] priors: named "mu_B", "V_r", "a", "b"
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named "delta", second named "phi"
 //'
-//' @return list of posterior update parameters
+//' @return [list] posterior update parameters
 //'
 // [[Rcpp::export]]
 List fit_cpp(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
@@ -171,7 +171,7 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
 //'
 //' @param poster the output from "fit_cpp" function
 //' @param R number of posterior samples
-//' @param par boolean, if TRUE only \beta and \sigma^2 are sampled (\omega is omitted)
+//' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 //' @param p if par TRUE, it specifies the column number of X
 //'
 //' @return list of posterior samples
@@ -827,7 +827,7 @@ arma::mat BPS_post_draws(const List& data, const List& priors, const arma::mat& 
 // MULTIVARIATE LATENT MODELS ---------------------------------------------------------------------
 
 
-//' Compute the parameters for the posteriors distribution of \beta and \Sigma (i.e. updated parameters)
+//' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
 //'
 //' @param data two dimensional list: first named "Y", second named "X"
 //' @param priors list with the priors: named "mu_B", "V_r", "a", "b"
@@ -952,7 +952,7 @@ List fit_latent_cpp2(const List& data, const List& priors, const arma::mat& dist
 //'
 //' @param poster the output from "fit_cpp" function
 //' @param R number of posterior samples
-//' @param par boolean, if TRUE only \beta and \sigma^2 are sampled (\omega is omitted)
+//' @param par boolean, if TRUE only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 //' @param p if par TRUE, it specifies the column number of X
 //'
 //' @return list of posterior samples
