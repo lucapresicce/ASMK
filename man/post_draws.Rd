@@ -4,7 +4,7 @@
 \alias{post_draws}
 \title{Sample R draws from the posterior distributions}
 \usage{
-post_draws(poster, R = 50L, par = FALSE, p = 1L)
+post_draws(poster, R, par, p)
 }
 \arguments{
 \item{poster}{\link{list} output from \code{fit_cpp} function}

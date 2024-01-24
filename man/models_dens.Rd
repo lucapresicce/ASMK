@@ -4,7 +4,7 @@
 \alias{models_dens}
 \title{Return the CV predictive density evaluations for all the model combinations}
 \usage{
-models_dens(data, priors, coords, hyperpar, useKCV, K = 10L)
+models_dens(data, priors, coords, hyperpar, useKCV, K)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}

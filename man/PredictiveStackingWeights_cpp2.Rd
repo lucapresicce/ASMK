@@ -20,7 +20,7 @@ PredictiveStackingWeights_cpp2(Y, X, crd_s, Delta, Fi, K = 10)
 \item{K}{\link{integer} if \code{KCV = TRUE}, represent the number of desired K-fold}
 }
 \value{
-A list A list with the following components:
+A list with the following components:
 \item{Grid}{\link{matrix} models configuration and the associated weights}
 \item{W}{\link{matrix} stacking weights}
 }

@@ -11,9 +11,9 @@ fit_latent_cpp2(data, priors, dist, hyperpar)
 
 \item{priors}{\link{list} priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
-\item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
+\item{dist}{\link{matrix} sample distance matrix}
 
-\item{coords}{\link{matrix} sample coordinates for X and Y}
+\item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 }
 \value{
 \link{list} posterior update parameters

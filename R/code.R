@@ -17,7 +17,7 @@
 #'
 #' @importFrom CVXR Variable Maximize Problem solve
 #'
-#' @export
+#'
 PredictiveStackingWeights_cpp <- function(Y, X, crd_s, Delta = NULL, Alfa = NULL, Fi, KCV = F, K = 10) {
 
   ## mandatory packages --------------------------------------------------------
@@ -106,13 +106,13 @@ PredictiveStackingWeights_cpp <- function(Y, X, crd_s, Delta = NULL, Alfa = NULL
 #' @param Fi [vector] candidate values for hyperparameter \eqn{\phi}
 #' @param K [integer] if \code{KCV = TRUE}, represent the number of desired K-fold
 #'
-#' @return A list A list with the following components:
+#' @return A list with the following components:
 #' \item{Grid}{[matrix] models configuration and the associated weights}
 #' \item{W}{[matrix] stacking weights}
 #'
 #' @importFrom CVXR Variable Maximize Problem solve
 #'
-#' @export
+#'
 # Compute the stacking weights for univariate spatial regression (latent model)
 PredictiveStackingWeights_cpp2 <- function(Y, X, crd_s, Delta, Fi, K = 10) {
 
@@ -120,6 +120,7 @@ PredictiveStackingWeights_cpp2 <- function(Y, X, crd_s, Delta, Fi, K = 10) {
   # library(CVXR, quietly = T)
 
   ## evaluate the loocv predictive density
+  p <- ncol(X)
   out <- models_dens2(data = list(Y = Y, X = X), coords = crd_s,
                       priors = list(mu_b = matrix(rep(0, p)),
                                     V_b = diag(10, p),
@@ -152,3 +153,77 @@ PredictiveStackingWeights_cpp2 <- function(Y, X, crd_s, Delta, Fi, K = 10) {
   return(list("Grid" = dfw, "W" = w_hat, "beta" = out$beta, "sigma" = out$sigma))
 
 }
+
+
+#' Solver for Bayesian Predictive Stacking of Predictive densities convex optimization problem
+#'
+#' @param scores [matrix] \eqn{N \times K} of expected predictive density evaluations for the K models considered
+#'
+#' @return W [matrix] of Bayesian Predictive Stacking weights for the K models considered
+#'
+#' @importFrom CVXR Variable Maximize Problem solve
+#'
+#' @export
+conv_opt <- function(scores) {
+  # library(CVXR, quietly = T)
+
+  # set up minimization problem and solve it
+  weights <- Variable( ncol(scores) )
+  constraints <- list(weights >= 0, sum(weights) == 1)
+
+  # the constraint for sum up to 1 with positive weights
+  f <- Maximize( mean( log( scores %*% weights ) ) )
+  problem <- Problem(f, constraints)
+  result <- solve(problem, solver = "ECOS_BB") # ECOS, SCS, OSQP
+
+  # return the weights
+  W <- if(result$status == "solver_error") {
+    matrix(rep(1/ncol(scores), ncol(scores)))
+  } else {
+    result$getValue(weights)
+  }
+  return(W)
+}
+
+
+#' Using Bayesian Predictive Stacking to combine subset models
+#'
+#' @param fit_list [list] of fitted models for all the subsets
+#'
+#' @return A list with the following components:
+#' \item{W}{[matrix] stacking weights of all model configurations}
+#' \item{W_lsit}{[list] stackign weights for each model configurations}
+#'
+#' @export
+BPScombine <- function(fit_list) {
+
+  # number of subsets
+  K <- length(fit_list)
+
+  # weights list
+  W_list <- list()
+  for(i in 1:K){
+    W_list[[i]] <- fit_list[[i]][[2]]
+    attr(W_list[[i]], "class") <- "matrix"
+  }
+
+  # epd list
+  out3 <- lapply(1:K, function(i){fit_list[[i]][[1]]})
+  out3 <- do.call(rbind, out3)
+  # ind_0 <- which(apply(out3, 1, sum) !=0 )
+  # out3 <- out3[ind_0,]
+  out4 <- sapply(1:K, function(k){
+    out3 %*% W_list[[k]]
+  })
+
+  # convex optimization
+  Wbps <- conv_opt(scores = out4)
+
+  # remove small weights - (3.1) of "Scalable and Robust Bayesian Inference via the Median Posterior"
+  ind_W <- which(Wbps > 1/(2*length(Wbps)))
+  Wbps[-ind_W,] <- 0
+
+  return(list("W" = Wbps,
+              "W_list" = W_list))
+}
+
