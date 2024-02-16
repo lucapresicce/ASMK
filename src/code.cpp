@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
 #include "code.h"
+#include "utilsC.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -8,121 +8,9 @@ using namespace Rcpp;
 using namespace arma;
 
 
-// UTILITY FUNCTIONS ------------------------------------------------------------------------------
-
-
-//' Compute the Euclidean distance matrix
-//'
-//' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
-//'
-//' @return [matrix] distance matrix of the elements of \eqn{X}
-//' @export
-// [[Rcpp::export(name = "arma_dist")]]
-arma::mat arma_dist(const arma::mat & X){
-  int n = X.n_rows;
-  arma::mat D(n, n, fill::zeros); // Allocate a matrix of dimension n x n
-  for (int i = 0; i < n; i++) {
-    for(int k = 0; k < i; k++){
-      D(i, k) = sqrt(sum(pow(X.row(i) - X.row(k), 2)));
-      D(k, i) = D(i, k);
-    }
-  }
-  return D;
-}
-
-
-//' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
-//'
-//' @param x [vector] first vector of numeric elements
-//' @param y [vector] second vector of numeric elements
-//'
-//' @return [matrix] expanded grid of combinations
-//' @export
-// [[Rcpp::export]]
-arma::mat expand_grid_cpp(const arma::vec& x, const arma::vec& y) {
-  int n1 = x.size();
-  int n2 = y.size();
-  int n_combinations = n1 * n2;
-
-  arma::mat result(n_combinations, 2);
-
-  int k = 0;
-  for (int j = 0; j < n2; j++) {
-    for (int i = 0; i < n1; i++) {
-      result(k, 0) = x[i];
-      result(k, 1) = y[j];
-      k++;
-    }
-  }
-
-  return result;
-}
-
-
-//' Function to sample integers (index)
-//'
-//' @param size [integer] dimension of the set to sample
-//' @param length [integer] number of elements to sample
-//' @param p [vector] sampling probabilities
-//'
-//' @return [vector] sample of integers
-//' @export
-// [[Rcpp::export]]
-arma::uvec sample_index(const int& size, const int& length, const arma::vec& p){
-  arma::uvec sequence = arma::linspace<arma::uvec>(0, size-1, size);
-  arma::uvec out = Rcpp::RcppArmadillo::sample(sequence, length, true, p);
-  return out;
-}
-
-
-//' Function to subset data for meta-analysis
-//'
-//' @param data [list] three elements: first named \eqn{Y}, second named \eqn{X}, third named \eqn{crd}
-//' @param K [integer] number of desired subsets
-//'
-//' @return [list] subsets of data, and the set of indexes
-//' @export
-// [[Rcpp::export]]
-List subset_data(const List& data, int K) {
-
-  // Unpack data and priors
-  arma::mat Y = as<arma::mat>(data["Y"]);
-  arma::mat X = as<arma::mat>(data["X"]);
-  arma::mat crd = as<arma::mat>(data["crd"]);
-
-  // Setting set size
-  int n = Y.n_rows;
-  int set_size = floor(n / K);
-
-  arma::uvec indices = arma::randperm(n);
-
-  // Subsetting
-  List Y_list(K);
-  List X_list(K);
-  List crd_list(K);
-  List sets(K);
-
-  for (int k = 0; k < K; ++k) {
-
-    // set index
-    arma::uvec ind_k = indices.subvec( (k * set_size), ((k + 1) * set_size) - 1);
-
-    // subset data
-    Y_list[k] = arma::conv_to<arma::mat>::from(Y.rows(ind_k));
-    X_list[k] = arma::conv_to<arma::mat>::from(X.rows(ind_k));
-    crd_list[k] = arma::conv_to<arma::mat>::from(crd.rows(ind_k));
-    sets[k] = ind_k;
-
-  }
-
-  return List::create(Named("Y_list") = Y_list,
-                      Named("X_list") = X_list,
-                      Named("crd_list") = crd_list,
-                      Named("sets") = sets);
-}
-
-
-// UNIVARIATE LATENT MODELS -----------------------------------------------------------------------
+// ##################################################################################################################################################
+// UNIVARIATE LATENT MODELS #########################################################################################################################
+// ##################################################################################################################################################
 
 
 //' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
@@ -149,6 +37,7 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
 
   int n = Y.n_rows;
   int p = X.n_cols;
+  // arma::mat d_s = C_dist(coords);
   arma::mat d_s = arma_dist(coords);
   arma::mat Rphi_s = exp(-phi * d_s);
 
@@ -480,7 +369,7 @@ arma::vec dens_loocv(const List& data, const List& priors, const arma::mat& coor
 //' @return [vector] posterior predictive density evaluations
 //'
 // [[Rcpp::export]]
-arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K) { //, const int& seed) {
+arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const int& K, const int& g) { //, const int& seed) {
 
   // unpack data
   arma::mat Y = as<arma::mat>(data["Y"]);
@@ -519,7 +408,7 @@ arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords
     arma::mat iRphi_k = as<arma::mat>(poster_k["iRphi_s"]);
 
     // posterior draws
-    List post_k = post_draws(poster_k, 1);
+    List post_k = post_draws(poster_k, g);
 
     // evaluate predictive density for the test set of the current fold
     for (uword i = 0; i < testSet.n_elem; i++) {
@@ -535,7 +424,7 @@ arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords
       arma::mat crd_is = join_cols(crd_i, coords_tr);
       arma::mat d_is = arma_dist(crd_is);
 
-      double dens = as_scalar(d_pred_cpp(data_tr, X_i, Y_i, iRphi_k, d_i, d_is, hyperpar, post_k));
+      double dens = mean(d_pred_cpp(data_tr, X_i, Y_i, iRphi_k, d_i, d_is, hyperpar, post_k));
       predictions(testSet(i)) = dens;
     }
   }
@@ -557,7 +446,7 @@ arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //'
 // [[Rcpp::export]]
-arma::mat models_dens(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const bool& useKCV, const int& K) {
+arma::mat models_dens(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const bool& useKCV, const int& K, const int& g) {
 
   // build the grid of hyperparameters
   arma::vec Delta = hyperpar["delta"];
@@ -580,7 +469,7 @@ arma::mat models_dens(const List& data, const List& priors, const arma::mat& coo
     // Call the appropriate function based on the 'useKCV' argument
     arma::vec out_j;
     if (useKCV) {
-      out_j = dens_kcv(data, priors, coords, hmod, K);
+      out_j = dens_kcv(data, priors, coords, hmod, K, g);
     } else {
       out_j = dens_loocv(data, priors, coords, hmod);
     }
@@ -748,13 +637,25 @@ List models_dens2(const List& data, const List& priors, const arma::mat& coords,
 // [[Rcpp::export]]
 SEXP CVXR_opt(const arma::mat& scores) {
 
-  // environment
-  Environment glob_env = Environment::global_env();
-  Function conv_opt = glob_env["conv_opt"];
+  // Evaluate R expression in the package environment
+  Rcpp::Environment pkg_env = Rcpp::Environment::namespace_env("ASMK");
+  Rcpp::Function conv_opt = pkg_env["conv_opt"];
 
-  // apply convex optimization by CVXR as R function
+  // // Check if the function is callable
+  // if (!conv_opt) {
+  //   Rcerr << "Error: 'conv_opt' is not a callable R function." << std::endl;
+  //   return R_NilValue; // or handle the error accordingly
+  // }
+  //
+  // if (Rf_isFunction(conv_opt)) {
+  //   Rcout << "conv_opt is a function." << std::endl;
+  // } else {
+  //   Rcerr << "Error: 'conv_opt' is not a function." << std::endl;
+  //   return R_NilValue; // or handle the error accordingly
+  // }
+
+  // Apply convex optimization by CVXR as an R function
   return conv_opt(Named("scores", scores));
-
 }
 
 
@@ -769,7 +670,7 @@ SEXP CVXR_opt(const arma::mat& scores) {
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //'
 // [[Rcpp::export]]
-arma::mat BPSweights_cpp(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, int K) {
+arma::mat BPSweights_cpp2(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, int K) {
 
   // compute predictive density evaluations
   arma::mat out = models_dens(data, priors, coords, hyperpar, true, K);
@@ -796,15 +697,17 @@ arma::mat BPSweights_cpp(const List& data, const List& priors, const arma::mat& 
 //' @param K [integer] number of folds
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
-//'
+//' @export
 // [[Rcpp::export]]
-List BPSweights_cpp2(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, int K) {
+List BPS_weights(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, int K, const int& g) {
 
   // compute predictive density evaluations
-  arma::mat out = models_dens(data, priors, coords, hyperpar, true, K);
+  arma::mat out = models_dens(data, priors, coords, hyperpar, true, K, g);
 
   // compute the weights
   arma::mat weights = as<arma::mat>(CVXR_opt(out));
+  weights.elem(find(weights <= 0)).zeros();
+  weights /= sum(weights, 0).eval()(0, 0);
 
   // return the list (BPS weights, Grid, and predictive density evaluations)
   arma::vec Delta = hyperpar["delta"];
@@ -828,7 +731,7 @@ List BPSweights_cpp2(const List& data, const List& priors, const arma::mat& coor
 //' @param K [integer] number of folds
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
-//'
+//' @export
 // [[Rcpp::export]]
 List BPS_combine(const List& fit_list, const int& K, const double& rp) {
 
@@ -869,9 +772,69 @@ List BPS_combine(const List& fit_list, const int& K, const double& rp) {
   // Remove small weights
   double threshold = 1.0 / (2.0 * Wbps.n_elem);
   Wbps.elem(find(Wbps < threshold)).zeros();
+  Wbps /= sum(Wbps, 0).eval()(0, 0);
 
   // Return results as a List
   return List::create(Named("W") = Wbps,
+                      Named("W_list") = W_list);
+}
+
+
+//' Combine subset models wiht Pseudo-BMA
+//'
+//' @param fit_list [list] K fitted model outputs composed by two elements each: first named \eqn{epd}, second named \eqn{W}
+//' @param K [integer] number of folds
+//'
+//' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
+//' @export
+// [[Rcpp::export]]
+List BPS_PseudoBMA(const List& fit_list) {
+
+  // Number of subsets
+  int K = fit_list.size();
+
+  // Collect model pd and weights list
+  List W_list(K);
+  List out3(K);
+  for (int i = 0; i < K; ++i) {
+    List ls = fit_list[i];
+    W_list[i] = as<arma::mat>(ls[1]);
+    out3[i] = as<arma::mat>(ls[0]);
+  }
+
+  int nn = as<arma::mat>(out3[0]).n_rows;
+  arma::mat out4(K, K, arma::fill::zeros);
+
+  // Compute log likelihood and sum over models
+  for (int j = 0; j < K; ++j) {
+    arma::mat sp(nn, K, arma::fill::zeros);
+
+    for (int k = 0; k < K; ++k) {
+      arma::mat out3_k = as<arma::mat>(out3[k]);
+      arma::mat W_j = W_list[j];
+      sp.col(k) = log(out3_k * W_j);
+    }
+
+    // Handle non-finite values
+    sp.elem(find_nonfinite(sp)).zeros();
+    out4.row(j) = sum(sp, 0);
+  }
+
+
+  // Compute elpd
+  out4 = out4/nn;
+  arma::mat out8 = trans(mean(out4, 0));
+
+
+  // Compute pseudo-BMA weights
+  arma::mat Waic = exp(out8);
+  Waic = Waic/sum(Waic, 0).eval()(0, 0);
+
+  // Noise threshold
+  Waic.elem(find(Waic <= 1 / (2 * Waic.size()))).zeros();
+  Waic /= sum(Waic, 0).eval()(0, 0);
+
+  return List::create(Named("W") = Waic,
                       Named("W_list") = W_list);
 }
 
@@ -888,9 +851,9 @@ List BPS_combine(const List& fit_list, const int& K, const double& rp) {
 //' @param R [integer] number of desired samples
 //'
 //' @return [list] BPS posterior predictive samples
-//'
+//' @export
 // [[Rcpp::export]]
-List BPS_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+List BPS_pred(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
 
   arma::mat Z_pred;
   arma::mat Y_pred;
@@ -900,13 +863,13 @@ List BPS_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const Lis
   arma::mat crd_us = join_cols(crd_u, coords);
   arma::mat d_us = arma_dist(crd_us);
 
-  for(int r = 0; r < R; r++) {
+  // build the grid of hyperparameters
+  arma::vec Delta = hyperpar["delta"];
+  arma::vec Fi = hyperpar["phi"];
+  arma::mat Grid = expand_grid_cpp(Delta, Fi);
+  int k = Grid.n_rows;
 
-    // build the grid of hyperparameters
-    arma::vec Delta = hyperpar["delta"];
-    arma::vec Fi = hyperpar["phi"];
-    arma::mat Grid = expand_grid_cpp(Delta, Fi);
-    int k = Grid.n_rows;
+  for(int r = 0; r < R; r++) {
 
     // sample the model
     arma::uvec kmod = sample_index(k, 1, W);
@@ -957,12 +920,14 @@ List BPS_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, const Lis
 //' @param R [integer] number of desired samples
 //'
 //' @return [list] BPS posterior predictive samples
-//
+//' @export
 // [[Rcpp::export]]
-List fast_BPSpred(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+List BPS_post(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
 
   arma::mat Z_pred;
   arma::mat Y_pred;
+  arma::mat Betas;
+  arma::vec Sigmas(R);
 
   // compute distance matrices
   arma::mat d_u = arma_dist(crd_u);
@@ -995,6 +960,12 @@ List fast_BPSpred(const List& data, const arma::mat& X_u, const List& priors, co
     // posterior draws
     List post = post_draws(poster, 1);
 
+    // save posterior samples
+    arma::mat beta = as<arma::mat>(post["Betas"]);
+    arma::vec sigma = as<arma::vec>(post["Sigmas"]);
+    Betas =  join_vert(Betas, beta);
+    Sigmas(r) =  sigma(0);
+
     // draw from conditional posterior predictive
     arma::mat iRphi_s = as<arma::mat>(poster["iRphi_s"]);
     List pred_R = r_pred_cpp(data, X_u, iRphi_s, d_u, d_us, hmod, post);
@@ -1009,7 +980,9 @@ List fast_BPSpred(const List& data, const arma::mat& X_u, const List& priors, co
 
   // return pred;
   return List::create(Named("Z_hat") = Z_pred,
-                      Named("Y_hat") = Y_pred);
+                      Named("Y_hat") = Y_pred,
+                      Named("Betas") = Betas,
+                      Named("Sigmas") = Sigmas);
 
 }
 
@@ -1078,8 +1051,8 @@ List BPS_SpatialPrediction_cpp2(const List& data, const arma::mat& X_u, const Li
   arma::uvec kmod = sample_index(k, R, W);
 
 
-  arma::mat Z_hat(X_u.n_rows, R, fill::zeros);
-  arma::mat Y_hat(X_u.n_rows, R, fill::zeros);
+  arma::mat Z_hat(X_u.n_rows, R, arma::fill::zeros);
+  arma::mat Y_hat(X_u.n_rows, R, arma::fill::zeros);
 
   // Imputation loop
   for(int r = 0; r < R; r++) {
@@ -1161,8 +1134,8 @@ List fast_BPSpred2(const List& data, const arma::mat& X_u, const List& priors, c
   arma::uvec kmod = sample_index(k, R, W);
 
 
-  arma::mat Z_hat(X_u.n_rows, R, fill::zeros);
-  arma::mat Y_hat(X_u.n_rows, R, fill::zeros);
+  arma::mat Z_hat(X_u.n_rows, R, arma::fill::zeros);
+  arma::mat Y_hat(X_u.n_rows, R, arma::fill::zeros);
 
   // Imputation loop
   for(int r = 0; r < R; r++) {
@@ -1250,8 +1223,8 @@ List fast_BPSpred3(const List& data, const arma::mat& X_u, const List& priors, c
   }
 
   // initialize result containers
-  arma::mat Z_hat(X_u.n_rows, R, fill::zeros);
-  arma::mat Y_hat(X_u.n_rows, R, fill::zeros);
+  arma::mat Z_hat(X_u.n_rows, R, arma::fill::zeros);
+  arma::mat Y_hat(X_u.n_rows, R, arma::fill::zeros);
 
   // Imputation loop
   for(int r = 0; r < R; r++) {
@@ -1311,7 +1284,7 @@ List spPredict_ASMK(const List& data, const arma::mat& X_u, const List& priors, 
     arma::mat sub_crd_u = crd_u.rows(set_j);
 
     // Call the user-defined function FUN
-    List out_j = fast_BPSpred(data, sub_X_u, priors, coords, sub_crd_u, hyperpar, W, R);
+    List out_j = BPS_pred(data, sub_X_u, priors, coords, sub_crd_u, hyperpar, W, R);
 
     // Append the results to the output list
     out_rZ = join_vert(out_rZ, as<arma::mat>(out_j["Z_hat"]));
@@ -1384,9 +1357,9 @@ List spPredict_ASMK2(const List& data, const arma::mat& X_u, const List& priors,
 //' @param R [integer] number of desired samples
 //'
 //' @return [matrix] BPS posterior samples
-//'
+//' @export
 // [[Rcpp::export]]
-arma::mat BPS_post_draws(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const arma::vec& W, const int& R) {
+arma::mat BPS_postdraws(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const arma::vec& W, const int& R) {
 
   // initialize return object
   arma::mat X = as<arma::mat>(data["X"]);
@@ -1438,7 +1411,9 @@ arma::mat BPS_post_draws(const List& data, const List& priors, const arma::mat& 
 }
 
 
-// MULTIVARIATE LATENT MODELS ---------------------------------------------------------------------
+// ##################################################################################################################################################
+// MULTIVARIATE LATENT MODELS #######################################################################################################################
+// ##################################################################################################################################################
 
 
 //' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
@@ -2045,4 +2020,228 @@ List BPS_latent_SpatialPrediction_cpp(const List& data, const arma::mat& X_u, co
   return pred;
 
 }
+
+
+//' Compute the BPS weights by convex optimization
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param K [integer] number of folds
+//'
+//' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
+//' @export
+// [[Rcpp::export]]
+List BPS_weights_MvT(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, int K) {
+
+  // compute predictive density evaluations
+  arma::mat out = models_dens_latent(data, priors, coords, hyperpar, true, K);
+
+  // compute the weights
+  arma::mat weights = as<arma::mat>(CVXR_opt(out));
+  weights.elem(find(weights <= 0)).zeros();
+  weights /= sum(weights, 0).eval()(0, 0);
+
+  // return the list (BPS weights, Grid, and predictive density evaluations)
+  arma::vec Alfa = hyperpar["alpha"];
+  arma::vec Fi = hyperpar["phi"];
+  arma::mat Grid = expand_grid_cpp(Alfa, Fi);
+  arma::mat res = join_horiz(weights, Grid);
+
+  List Res = List::create(
+    Named("Grid") = res,
+    Named("W") = weights,
+    Named("epd") = out
+  );
+
+  return Res;
+}
+
+
+//' Compute the BPS spatial prediction given a set of stacking weights
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
+//'
+//' @return [list] BPS posterior predictive samples
+//' @export
+// [[Rcpp::export]]
+List BPS_pred_MvT(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+
+  List pred(R);
+
+  // compute distance matrices
+  arma::mat d_u = arma_dist(crd_u);
+  arma::mat crd_us = join_cols(crd_u, coords);
+  arma::mat d_us = arma_dist(crd_us);
+
+  // build the grid of hyperparameters
+  arma::vec Alfa = hyperpar["alpha"];
+  arma::vec Fi = hyperpar["phi"];
+  arma::mat Grid = expand_grid_cpp(Alfa, Fi);
+  int k = Grid.n_rows;
+
+  // sample the model
+  arma::uvec kmod = sample_index(k, R, W);
+
+  for(int r = 0; r < R; r++) {
+
+    // identify the k-th model
+    arma::uword k_mod = kmod(r);
+    arma::rowvec hpar = Grid.row(k_mod);
+    double alfa = hpar[0];
+    double fi = hpar[1];
+    List hmod = List::create(
+      Named("alpha") = alfa,
+      Named("phi") = fi);
+
+    // fit your model on the training data
+    List poster = fit_latent_cpp(data, priors, coords, hmod);
+
+    // posterior draws
+    List post = post_draws_latent(poster, 1);
+    List drw = post(0);
+    arma::mat b = as<arma::mat>(drw["beta"]);
+    arma::mat s = as<arma::mat>(drw["sigma"]);
+
+    // draw from conditional posterior predictive
+    pred(r) = r_pred_latent_cpp(data, X_u, d_u, d_us, hmod, poster, b, s);
+
+  }
+
+  return pred;
+
+}
+
+
+//' Compute the BPS spatial prediction given a set of stacking weights
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
+//'
+//' @return [list] BPS posterior predictive samples
+//' @export
+// [[Rcpp::export]]
+List BPS_post_MvT(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+
+  List pred(R);
+  List post_smp(R);
+
+  // compute distance matrices
+  arma::mat d_u = arma_dist(crd_u);
+  arma::mat crd_us = join_cols(crd_u, coords);
+  arma::mat d_us = arma_dist(crd_us);
+
+  // build the grid of hyperparameters
+  arma::vec Alfa = hyperpar["alpha"];
+  arma::vec Fi = hyperpar["phi"];
+  arma::mat Grid = expand_grid_cpp(Alfa, Fi);
+  int k = Grid.n_rows;
+
+  // sample the model
+  arma::uvec kmod = sample_index(k, R, W);
+
+  for(int r = 0; r < R; r++) {
+
+    // identify the k-th model
+    arma::uword k_mod = kmod(r);
+    arma::rowvec hpar = Grid.row(k_mod);
+    double alfa = hpar[0];
+    double fi = hpar[1];
+    List hmod = List::create(
+      Named("alpha") = alfa,
+      Named("phi") = fi);
+
+    // fit your model on the training data
+    List poster = fit_latent_cpp(data, priors, coords, hmod);
+
+    // posterior draws
+    List post = post_draws_latent(poster, 1);
+    List drw = post(0);
+    arma::mat b = as<arma::mat>(drw["beta"]);
+    arma::mat s = as<arma::mat>(drw["sigma"]);
+
+    // draw from conditional posterior predictive
+    pred(r) = r_pred_latent_cpp(data, X_u, d_u, d_us, hmod, poster, b, s);
+
+    // save posterior draw
+    post_smp(r) = drw;
+  }
+
+  return List::create(Named("Pred") = pred,
+                      Named("Post") = post_smp);
+
+}
+
+
+//' Compute the BPS posterior samples given a set of stacking weights
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
+//'
+//' @return [matrix] BPS posterior samples
+//' @export
+// [[Rcpp::export]]
+List BPS_postdraws_MvT(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar, const arma::vec& W, const int& R) {
+
+  // Unpack necessary dimensions
+  arma::mat V_r = as<arma::mat>(priors["V_r"]);
+  int p = V_r.n_cols;
+
+  // initialize return object
+  List Draws(R);
+
+  for(int r = 0; r < R; r++) {
+
+    // build the grid of hyperparameters
+    arma::vec Alfa = hyperpar["alpha"];
+    arma::vec Fi = hyperpar["phi"];
+    arma::mat Grid = expand_grid_cpp(Alfa, Fi);
+    int k = Grid.n_rows;
+
+    // sample the model
+    arma::uvec kmod = sample_index(k, 1, W);
+    arma::uword k_mod = kmod(0);
+
+    // identify the k-th model
+    arma::rowvec hpar = Grid.row(k_mod);
+    double alfa = hpar[0];
+    double fi = hpar[1];
+    List hmod = List::create(
+      Named("alpha") = alfa,
+      Named("phi") = fi);
+
+    // fit your model on the training data
+    List poster = fit_latent_cpp(data, priors, coords, hmod);
+
+    // posterior draws
+    bool par = true;
+    List post = post_draws_latent(poster, 1, par = par, p = p);
+
+    Draws(r) =  post;
+
+  }
+
+  // return pred;
+  return Draws;
+
+}
+
 

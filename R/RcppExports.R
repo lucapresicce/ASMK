@@ -11,67 +11,9 @@
 #' @param R [integer] number of poterior predictive sample
 #'
 #' @return [list] posterior update parameters
-#' @export
+#'
 spASMK <- function(data, priors, hyperpar, K, newdata, R = 250L) {
     .Call(`_ASMK_spASMK`, data, priors, hyperpar, K, newdata, R)
-}
-
-#' Compute the BPS spatial prediction given a set of stacking weights
-#'
-#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
-#' @param X_u [matrix] unobserved instances covariate matrix
-#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
-#' @param coords [matrix] sample coordinates for X and Y
-#' @param crd_u [matrix] unboserved instances coordinates
-#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
-#' @param W [matrix] set of stacking weights
-#' @param R [integer] number of desired samples
-#'
-#' @return [list] BPS posterior predictive samples
-NULL
-
-#' Compute the Euclidean distance matrix
-#'
-#' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
-#'
-#' @return [matrix] distance matrix of the elements of \eqn{X}
-#' @export
-arma_dist <- function(X) {
-    .Call(`_ASMK_arma_dist`, X)
-}
-
-#' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
-#'
-#' @param x [vector] first vector of numeric elements
-#' @param y [vector] second vector of numeric elements
-#'
-#' @return [matrix] expanded grid of combinations
-#' @export
-expand_grid_cpp <- function(x, y) {
-    .Call(`_ASMK_expand_grid_cpp`, x, y)
-}
-
-#' Function to sample integers (index)
-#'
-#' @param size [integer] dimension of the set to sample
-#' @param length [integer] number of elements to sample
-#' @param p [vector] sampling probabilities
-#'
-#' @return [vector] sample of integers
-#' @export
-sample_index <- function(size, length, p) {
-    .Call(`_ASMK_sample_index`, size, length, p)
-}
-
-#' Function to subset data for meta-analysis
-#'
-#' @param data [list] three elements: first named \eqn{Y}, second named \eqn{X}, third named \eqn{crd}
-#' @param K [integer] number of desired subsets
-#'
-#' @return [list] subsets of data, and the set of indexes
-#' @export
-subset_data <- function(data, K) {
-    .Call(`_ASMK_subset_data`, data, K)
 }
 
 #' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
@@ -156,8 +98,8 @@ dens_loocv <- function(data, priors, coords, hyperpar) {
 #'
 #' @return [vector] posterior predictive density evaluations
 #'
-dens_kcv <- function(data, priors, coords, hyperpar, K) {
-    .Call(`_ASMK_dens_kcv`, data, priors, coords, hyperpar, K)
+dens_kcv <- function(data, priors, coords, hyperpar, K, g) {
+    .Call(`_ASMK_dens_kcv`, data, priors, coords, hyperpar, K, g)
 }
 
 #' Return the CV predictive density evaluations for all the model combinations
@@ -171,8 +113,8 @@ dens_kcv <- function(data, priors, coords, hyperpar, K) {
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 #'
-models_dens <- function(data, priors, coords, hyperpar, useKCV, K) {
-    .Call(`_ASMK_models_dens`, data, priors, coords, hyperpar, useKCV, K)
+models_dens <- function(data, priors, coords, hyperpar, useKCV, K, g) {
+    .Call(`_ASMK_models_dens`, data, priors, coords, hyperpar, useKCV, K, g)
 }
 
 #' Compute the KCV of the density evaluations for fixed values of the hyperparameters
@@ -223,8 +165,8 @@ CVXR_opt <- function(scores) {
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 #'
-BPSweights_cpp <- function(data, priors, coords, hyperpar, K) {
-    .Call(`_ASMK_BPSweights_cpp`, data, priors, coords, hyperpar, K)
+BPSweights_cpp2 <- function(data, priors, coords, hyperpar, K) {
+    .Call(`_ASMK_BPSweights_cpp2`, data, priors, coords, hyperpar, K)
 }
 
 #' Compute the BPS weights by convex optimization
@@ -236,9 +178,9 @@ BPSweights_cpp <- function(data, priors, coords, hyperpar, K) {
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
-#'
-BPSweights_cpp2 <- function(data, priors, coords, hyperpar, K) {
-    .Call(`_ASMK_BPSweights_cpp2`, data, priors, coords, hyperpar, K)
+#' @export
+BPS_weights <- function(data, priors, coords, hyperpar, K, g) {
+    .Call(`_ASMK_BPS_weights`, data, priors, coords, hyperpar, K, g)
 }
 
 #' Combine subset models wiht BPS
@@ -247,9 +189,20 @@ BPSweights_cpp2 <- function(data, priors, coords, hyperpar, K) {
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
-#'
+#' @export
 BPS_combine <- function(fit_list, K, rp) {
     .Call(`_ASMK_BPS_combine`, fit_list, K, rp)
+}
+
+#' Combine subset models wiht Pseudo-BMA
+#'
+#' @param fit_list [list] K fitted model outputs composed by two elements each: first named \eqn{epd}, second named \eqn{W}
+#' @param K [integer] number of folds
+#'
+#' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
+#' @export
+BPS_PseudoBMA <- function(fit_list) {
+    .Call(`_ASMK_BPS_PseudoBMA`, fit_list)
 }
 
 #' Compute the BPS spatial prediction given a set of stacking weights
@@ -264,13 +217,26 @@ BPS_combine <- function(fit_list, K, rp) {
 #' @param R [integer] number of desired samples
 #'
 #' @return [list] BPS posterior predictive samples
-#'
-BPS_SpatialPrediction_cpp <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
-    .Call(`_ASMK_BPS_SpatialPrediction_cpp`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+#' @export
+BPS_pred <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_pred`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
 }
 
-fast_BPSpred <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
-    .Call(`_ASMK_fast_BPSpred`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+#' Compute the BPS spatial prediction given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param crd_u [matrix] unboserved instances coordinates
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [list] BPS posterior predictive samples
+#' @export
+BPS_post <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_post`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
 }
 
 #' Compute the BPS spatial prediction given a set of stacking weights
@@ -370,9 +336,9 @@ spPredict_ASMK2 <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R, J)
 #' @param R [integer] number of desired samples
 #'
 #' @return [matrix] BPS posterior samples
-#'
-BPS_post_draws <- function(data, priors, coords, hyperpar, W, R) {
-    .Call(`_ASMK_BPS_post_draws`, data, priors, coords, hyperpar, W, R)
+#' @export
+BPS_postdraws <- function(data, priors, coords, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_postdraws`, data, priors, coords, hyperpar, W, R)
 }
 
 #' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
@@ -521,5 +487,124 @@ models_dens_latent <- function(data, priors, coords, hyperpar, useKCV, K) {
 #'
 BPS_latent_SpatialPrediction_cpp <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
     .Call(`_ASMK_BPS_latent_SpatialPrediction_cpp`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+}
+
+#' Compute the BPS weights by convex optimization
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param K [integer] number of folds
+#'
+#' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
+#' @export
+BPS_weights_MvT <- function(data, priors, coords, hyperpar, K) {
+    .Call(`_ASMK_BPS_weights_MvT`, data, priors, coords, hyperpar, K)
+}
+
+#' Compute the BPS spatial prediction given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param crd_u [matrix] unboserved instances coordinates
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [list] BPS posterior predictive samples
+#' @export
+BPS_pred_MvT <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_pred_MvT`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+}
+
+#' Compute the BPS spatial prediction given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param crd_u [matrix] unboserved instances coordinates
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [list] BPS posterior predictive samples
+#' @export
+BPS_post_MvT <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_post_MvT`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+}
+
+#' Compute the BPS posterior samples given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [matrix] BPS posterior samples
+#' @export
+BPS_postdraws_MvT <- function(data, priors, coords, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_postdraws_MvT`, data, priors, coords, hyperpar, W, R)
+}
+
+#' Compute the Euclidean distance matrix
+#'
+#' @param X [matrix] (tipically of \eqn{N} coordindates on \eqn{\mathbb{R}^2} )
+#'
+#' @return [matrix] distance matrix of the elements of \eqn{X}
+#' @export
+arma_dist <- function(X) {
+    .Call(`_ASMK_arma_dist`, X)
+}
+
+#' Compute distane matrix (C function)
+#'
+cDist <- function(coords1_r, n1_r, coords2_r, n2_r, p_r, D_r) {
+    .Call(`_ASMK_cDist`, coords1_r, n1_r, coords2_r, n2_r, p_r, D_r)
+}
+
+#' Compute the Euclidean distance matrix (by External C function)
+#'
+C_dist <- function(coords1) {
+    .Call(`_ASMK_C_dist`, coords1)
+}
+
+#' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
+#'
+#' @param x [vector] first vector of numeric elements
+#' @param y [vector] second vector of numeric elements
+#'
+#' @return [matrix] expanded grid of combinations
+#' @export
+expand_grid_cpp <- function(x, y) {
+    .Call(`_ASMK_expand_grid_cpp`, x, y)
+}
+
+#' Function to sample integers (index)
+#'
+#' @param size [integer] dimension of the set to sample
+#' @param length [integer] number of elements to sample
+#' @param p [vector] sampling probabilities
+#'
+#' @return [vector] sample of integers
+#'
+sample_index <- function(size, length, p) {
+    .Call(`_ASMK_sample_index`, size, length, p)
+}
+
+#' Function to subset data for meta-analysis
+#'
+#' @param data [list] three elements: first named \eqn{Y}, second named \eqn{X}, third named \eqn{crd}
+#' @param K [integer] number of desired subsets
+#'
+#' @return [list] subsets of data, and the set of indexes
+#' @export
+subset_data <- function(data, K) {
+    .Call(`_ASMK_subset_data`, data, K)
 }
 

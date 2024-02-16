@@ -2,15 +2,7 @@
 #ifndef CODE_H
 #define CODE_H
 
-// Function declarations
-
-arma::mat arma_dist(const arma::mat & X);
-
-arma::mat expand_grid_cpp(const arma::vec& x, const arma::vec& y);
-
-arma::uvec sample_index(const int& size, const int& length, const arma::vec& p);
-
-Rcpp::List subset_data(const Rcpp::List& data, int K);
+// Function declarations (univariate models)
 
 Rcpp::List fit_cpp(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar);
 
@@ -22,25 +14,25 @@ arma::vec d_pred_cpp(const Rcpp::List& data, const arma::mat& X_u, const arma::v
 
 arma::vec dens_loocv(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar);
 
-arma::vec dens_kcv(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const int& K);
+arma::vec dens_kcv(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const int& K = 5, const int& g = 5);
 
-arma::mat models_dens(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const bool& useKCV, const int& K = 10);
+arma::mat models_dens(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const bool& useKCV, const int& K = 5, const int& g = 5);
 
 Rcpp::List dens_kcv2(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const int& K);
 
-Rcpp::List models_dens2(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const int& K = 10);
+Rcpp::List models_dens2(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const int& K = 5);
 
 SEXP CVXR_opt(const arma::mat& scores);
 
-arma::mat BPSweights_cpp(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, int K = 5);
+arma::mat BPSweights_cpp2(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, int K = 5);
 
-Rcpp::List BPSweights_cpp2(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, int K = 5);
+Rcpp::List BPS_weights(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, int K = 5, const int& g = 5);
 
 Rcpp::List BPS_combine(const Rcpp::List& fit_list, const int& K, const double& rp = 1);
 
-Rcpp::List BPS_SpatialPrediction_cpp(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+Rcpp::List BPS_PseudoBMA(const Rcpp::List& fit_list);
 
-Rcpp::List fast_BPSpred(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+Rcpp::List BPS_pred(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
 
 Rcpp::List BPS_SpatialPrediction_cpp2(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
 
@@ -52,7 +44,9 @@ Rcpp::List spPredict_ASMK(const Rcpp::List& data, const arma::mat& X_u, const Rc
 
 Rcpp::List spPredict_ASMK2(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R, const int& J = 1);
 
-arma::mat BPS_post_draws(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+arma::mat BPS_postdraws(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+
+// Function declarations (multivariate models)
 
 Rcpp::List fit_latent_cpp(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar);
 
@@ -73,5 +67,13 @@ arma::vec dens_kcv_latent(const Rcpp::List& data, const Rcpp::List& priors, cons
 arma::mat models_dens_latent(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, bool useKCV, int K = 10);
 
 Rcpp::List BPS_latent_SpatialPrediction_cpp(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+
+Rcpp::List BPS_weights_MvT(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, int K);
+
+Rcpp::List BPS_pred_MvT(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+
+Rcpp::List BPS_post_MvT(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
+
+Rcpp::List BPS_postdraws_MvT(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
 
 #endif

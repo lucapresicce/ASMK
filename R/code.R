@@ -194,7 +194,6 @@ conv_opt <- function(scores) {
 #' \item{W}{[matrix] stacking weights of all model configurations}
 #' \item{W_lsit}{[list] stackign weights for each model configurations}
 #'
-#' @export
 BPScombine <- function(fit_list) {
 
   # number of subsets
