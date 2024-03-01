@@ -1,4 +1,4 @@
-# Accelerated Spatail Meta-Kriging (ASMK)
+# Accelerated Spatial Meta-Kriging (ASMK)
 
 This package provides the principal functions to perform accelerated meta-kriging, for both univariate and multivariate spatial regression.
 
