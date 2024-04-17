@@ -34,55 +34,6 @@ arma::mat arma_dist(const arma::mat & X){
 }
 
 
-//' Compute distane matrix (C function)
-//'
-// [[Rcpp::export]]
-SEXP cDist(SEXP coords1_r, SEXP n1_r, SEXP coords2_r, SEXP n2_r, SEXP p_r, SEXP D_r){
-
-  double *coords1 = REAL(coords1_r);
-  int n1 = INTEGER(n1_r)[0];
-
-  double *coords2 = REAL(coords2_r);
-  int n2 = INTEGER(n2_r)[0];
-
-  int p = INTEGER(p_r)[0];
-
-  double *D = REAL(D_r);
-
-  int i, j, k;
-  double dist = 0.0;
-
-  for(i = 0; i < n1; i++){
-    for(j = 0; j < n2; j++){
-      dist = 0.0;
-      for(k = 0; k < p; k++){
-        dist += pow(coords1[k*n1+i]-coords2[k*n2+j],2);
-      }
-      D[n1*j+i] = sqrt(dist);
-    }
-  }
-
-  return(R_NilValue);
-}
-
-
-//' Compute the Euclidean distance matrix (by External C function)
-//'
-// [[Rcpp::export]]
-Rcpp::NumericMatrix C_dist(Rcpp::NumericMatrix coords1) {
-
-  int n1 = coords1.nrow();
-  int p = coords1.ncol();  // Assuming coords1 and coords2 have the same number of columns
-
-  Rcpp::NumericMatrix D(n1, n1);
-
-  Rcpp::Function cIDistFunc("cDist");
-  cIDistFunc(coords1, n1, coords1, n1, p, D);
-
-  return D;
-}
-
-
 //' Build a grid from two vector (i.e. equivalent to \code{expand.grid()} in \code{R})
 //'
 //' @param x [vector] first vector of numeric elements

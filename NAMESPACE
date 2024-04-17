@@ -2,8 +2,6 @@
 
 export(BPS_PseudoBMA)
 export(BPS_combine)
-export(BPS_post)
-export(BPS_post_MvT)
 export(BPS_postdraws)
 export(BPS_postdraws_MvT)
 export(BPS_pred)

@@ -4,7 +4,7 @@
 \alias{d_pred_cpp}
 \title{Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive}
 \usage{
-d_pred_cpp(data, X_u, Y_u, iRphi_s, d_u, d_us, hyperpar, poster)
+d_pred_cpp(data, X_u, Y_u, d_u, d_us, hyperpar, poster)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
@@ -13,8 +13,6 @@ d_pred_cpp(data, X_u, Y_u, iRphi_s, d_u, d_us, hyperpar, poster)
 
 \item{Y_u}{\link{matrix} unobserved instances response matrix}
 
-\item{iRphi_s}{\link{matrix} inverse of the sample correlation matrix}
-
 \item{d_u}{\link{matrix} unobserved instances distance matrix}
 
 \item{d_us}{\link{matrix} cross-distance between unobserved and observed instances matrix}
@@ -22,6 +20,8 @@ d_pred_cpp(data, X_u, Y_u, iRphi_s, d_u, d_us, hyperpar, poster)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
+
+\item{iRphi_s}{\link{matrix} inverse of the sample correlation matrix}
 }
 \value{
 \link{vector} posterior predictive density evaluations

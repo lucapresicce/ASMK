@@ -4,7 +4,7 @@
 \alias{BPS_weights}
 \title{Compute the BPS weights by convex optimization}
 \usage{
-BPS_weights(data, priors, coords, hyperpar, K, g)
+BPS_weights(data, priors, coords, hyperpar, K)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
@@ -16,6 +16,8 @@ BPS_weights(data, priors, coords, hyperpar, K, g)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{K}{\link{integer} number of folds}
+
+\item{g}{\link{integer} number of draws for MC density approximations}
 }
 \value{
 \link{matrix} posterior predictive density evaluations (each columns represent a different model)

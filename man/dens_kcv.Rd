@@ -4,7 +4,7 @@
 \alias{dens_kcv}
 \title{Compute the KCV of the density evaluations for fixed values of the hyperparameters}
 \usage{
-dens_kcv(data, priors, coords, hyperpar, K, g)
+dens_kcv(data, priors, coords, hyperpar, K)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}

@@ -8,8 +8,6 @@ BPS_PseudoBMA(fit_list)
 }
 \arguments{
 \item{fit_list}{\link{list} K fitted model outputs composed by two elements each: first named \eqn{epd}, second named \eqn{W}}
-
-\item{K}{\link{integer} number of folds}
 }
 \value{
 \link{matrix} posterior predictive density evaluations (each columns represent a different model)

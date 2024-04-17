@@ -4,7 +4,7 @@
 \alias{BPS_postdraws_MvT}
 \title{Compute the BPS posterior samples given a set of stacking weights}
 \usage{
-BPS_postdraws_MvT(data, priors, coords, hyperpar, W, R)
+BPS_postdraws_MvT(data, priors, coords, hyperpar, W, R, par)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}

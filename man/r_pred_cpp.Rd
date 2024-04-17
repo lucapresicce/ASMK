@@ -4,14 +4,12 @@
 \alias{r_pred_cpp}
 \title{Draw from the conditional posterior predictive for a set of unobserved covariates}
 \usage{
-r_pred_cpp(data, X_u, iRphi_s, d_u, d_us, hyperpar, poster)
+r_pred_cpp(data, X_u, d_u, d_us, hyperpar, poster, R)
 }
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
 
 \item{X_u}{\link{matrix} unobserved instances covariate matrix}
-
-\item{iRphi_s}{\link{matrix} inverse of the sample correlation matrix}
 
 \item{d_u}{\link{matrix} unobserved instances distance matrix}
 
@@ -20,6 +18,8 @@ r_pred_cpp(data, X_u, iRphi_s, d_u, d_us, hyperpar, poster)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
+
+\item{iRphi_s}{\link{matrix} inverse of the sample correlation matrix}
 }
 \value{
 \link{list} posterior predictive samples
