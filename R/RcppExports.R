@@ -59,11 +59,10 @@ post_draws <- function(poster, R, par, p) {
     .Call(`_ASMK_post_draws`, poster, R, par, p)
 }
 
-#' Draw from the conditional posterior predictive for a set of unobserved covariates
+#' Draw from the joint posterior predictive for a set of unobserved covariates
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
-#' @param iRphi_s [matrix] inverse of the sample correlation matrix
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
@@ -71,8 +70,39 @@ post_draws <- function(poster, R, par, p) {
 #'
 #' @return [list] posterior predictive samples
 #'
-r_pred_cpp <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
-    .Call(`_ASMK_r_pred_cpp`, data, X_u, d_u, d_us, hyperpar, poster, R)
+r_pred_joint <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
+    .Call(`_ASMK_r_pred_joint`, data, X_u, d_u, d_us, hyperpar, poster, R)
+}
+
+#' Draw from the marginals posterior predictive for a set of unobserved covariates
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param d_u [matrix] unobserved instances distance matrix
+#' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param poster [list] output from \code{fit_cpp} function
+#'
+#' @return [list] posterior predictive samples
+#'
+r_pred_marg <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
+    .Call(`_ASMK_r_pred_marg`, data, X_u, d_u, d_us, hyperpar, poster, R)
+}
+
+#' Draw from the conditional posterior predictive for a set of unobserved covariates
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param d_u [matrix] unobserved instances distance matrix
+#' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param poster [list] output from \code{fit_cpp} function
+#' @param post [list] output from \code{post_draws} function
+#'
+#' @return [list] posterior predictive samples
+#'
+r_pred_cond <- function(data, X_u, d_u, d_us, hyperpar, poster, post) {
+    .Call(`_ASMK_r_pred_cond`, data, X_u, d_u, d_us, hyperpar, poster, post)
 }
 
 #' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
@@ -166,6 +196,23 @@ BPS_pred <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
     .Call(`_ASMK_BPS_pred`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
 }
 
+#' Perform the BPS sampling from posterior and posterior predictive given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param crd_u [matrix] unboserved instances coordinates
+#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [list] BPS posterior predictive samples
+#' @export
+BPS_post <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_post`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+}
+
 #' Compute the BPS posterior samples given a set of stacking weights
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
@@ -225,7 +272,7 @@ post_draws_MvT <- function(poster, R, par, p) {
     .Call(`_ASMK_post_draws_MvT`, poster, R, par, p)
 }
 
-#' Draw from the conditional posterior predictive for a set of unobserved covariates
+#' Draw from the joint posterior predictive for a set of unobserved covariates
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
@@ -237,8 +284,40 @@ post_draws_MvT <- function(poster, R, par, p) {
 #'
 #' @return [list] posterior predictive samples
 #'
-r_pred_cpp_MvT <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
-    .Call(`_ASMK_r_pred_cpp_MvT`, data, X_u, d_u, d_us, hyperpar, poster, R)
+r_pred_joint_MvT <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
+    .Call(`_ASMK_r_pred_joint_MvT`, data, X_u, d_u, d_us, hyperpar, poster, R)
+}
+
+#' Draw from the joint posterior predictive for a set of unobserved covariates
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param d_u [matrix] unobserved instances distance matrix
+#' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+#' @param poster [list] output from \code{fit_cpp} function
+#' @param R [integer] number of posterior predictive samples
+#'
+#' @return [list] posterior predictive samples
+#'
+r_pred_marg_MvT <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
+    .Call(`_ASMK_r_pred_marg_MvT`, data, X_u, d_u, d_us, hyperpar, poster, R)
+}
+
+#' Draw from the conditional posterior predictive for a set of unobserved covariates
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param d_u [matrix] unobserved instances distance matrix
+#' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+#' @param poster [list] output from \code{fit_cpp_MvT} function
+#' @param post [list] output from \code{post_draws_MvT} function
+#'
+#' @return [list] posterior predictive samples
+#'
+r_pred_cond_MvT <- function(data, X_u, d_u, d_us, hyperpar, poster, post) {
+    .Call(`_ASMK_r_pred_cond_MvT`, data, X_u, d_u, d_us, hyperpar, poster, post)
 }
 
 #' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
@@ -304,9 +383,9 @@ models_dens_MvT <- function(data, priors, coords, hyperpar, useKCV, K) {
 #' Compute the BPS weights by convex optimization
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
-#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -319,10 +398,10 @@ BPS_weights_MvT <- function(data, priors, coords, hyperpar, K) {
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
-#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param crd_u [matrix] unboserved instances coordinates
-#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'
@@ -332,12 +411,29 @@ BPS_pred_MvT <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
     .Call(`_ASMK_BPS_pred_MvT`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
 }
 
+#' Perform the BPS sampling from posterior and posterior predictive given a set of stacking weights
+#'
+#' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+#' @param X_u [matrix] unobserved instances covariate matrix
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+#' @param coords [matrix] sample coordinates for X and Y
+#' @param crd_u [matrix] unboserved instances coordinates
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+#' @param W [matrix] set of stacking weights
+#' @param R [integer] number of desired samples
+#'
+#' @return [list] BPS posterior predictive samples
+#' @export
+BPS_post_MvT <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
+    .Call(`_ASMK_BPS_post_MvT`, data, X_u, priors, coords, crd_u, hyperpar, W, R)
+}
+
 #' Compute the BPS posterior samples given a set of stacking weights
 #'
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
-#' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+#' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
-#' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+#' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
 #'
@@ -389,5 +485,15 @@ sample_index <- function(size, length, p) {
 #' @export
 subset_data <- function(data, K) {
     .Call(`_ASMK_subset_data`, data, K)
+}
+
+#' Function to subset data for meta-analysis
+#'
+#' @param mat [matrix] not-symmetric matrix
+#'
+#' @return [matrix] symmetric matrix (lower triangular of \code{mat} is used)
+#' @export
+forceSymmetry_cpp <- function(mat) {
+    .Call(`_ASMK_forceSymmetry_cpp`, mat)
 }
 

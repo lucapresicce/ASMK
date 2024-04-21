@@ -12,6 +12,67 @@
 // // BACKUP FUNTCIONS - UNIVARIATE ####################################################################################################################
 // // ##################################################################################################################################################
 //
+// //' Compute the parameters for the posteriors distribution of \eqn{\beta} and \eqn{\Sigma} (i.e. updated parameters)
+// //'
+// //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+// //' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+// //' @param coords [matrix] sample coordinates for X and Y
+// //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+// //'
+// //' @return [list] posterior update parameters
+// //'
+// // [[Rcpp::export]]
+// List fit_cpp_optimized(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
+//
+//   // Unpack data and priors
+//   arma::mat Y = as<arma::mat>(data["Y"]);
+//   arma::mat X = as<arma::mat>(data["X"]);
+//   arma::vec mu_b = as<arma::vec>(priors["mu_b"]);
+//   arma::mat V_b = as<arma::mat>(priors["V_b"]);
+//   double b = as<double>(priors["b"]);
+//   double a = as<double>(priors["a"]);
+//   double delta = as<double>(hyperpar["delta"]);
+//   double phi = as<double>(hyperpar["phi"]);
+//
+//   int n = Y.n_rows;
+//
+//   arma::mat d_s = arma_dist(coords);
+//   arma::mat Rphi_s = exp(-phi * d_s);
+//
+//   // Precompute some reusable values
+//   double d = (1 / delta);
+//   arma::mat tX = trans(X);
+//   arma::mat iV_b = arma::inv(V_b);
+//   arma::mat iR_s = arma::inv(Rphi_s);
+//
+//   // Compute posterior updating
+//   arma::mat iM_B = d * tX * X + iV_b;
+//   arma::mat iM_BW = d * tX;
+//   arma::mat iM_WB = trans(iM_BW);
+//   arma::mat iM_W = iR_s + (d * eye<arma::mat>(n, n));
+//
+//   arma::mat iM_star1 = join_horiz(iM_B, iM_BW);
+//   arma::mat iM_star2 = join_horiz(iM_WB, iM_W);
+//   arma::mat iM_star = join_vert( iM_star1, iM_star2);
+//   arma::mat M_star = arma::inv(iM_star);
+//
+//   arma::vec M = join_vert( (d * tX * Y) + (iV_b * mu_b) , d * Y );
+//   arma::vec gamma_hat = M_star * M;
+//
+//   double dYY = as_scalar(d * trans(Y) * Y);
+//   double mbVbmb = as_scalar(trans(mu_b) * iV_b * mu_b);
+//   double bb = dYY + mbVbmb + as_scalar(trans(gamma_hat) * iM_star * gamma_hat) - as_scalar(2 * trans(gamma_hat) * M);
+//
+//   double b_star = b + 0.5 * as_scalar(bb);
+//   double a_star = a + (n/2);
+//
+//   // Return results as an R list
+//   return List::create(Named("M_star") = M_star,
+//                       Named("gamma_hat") = gamma_hat,
+//                       Named("b_star") = b_star,
+//                       Named("a_star") = a_star,
+//                       Named("iRphi_s") = iR_s);
+// }
 //
 // //' Draw from the conditional posterior predictive for a set of unobserved covariates
 // //'

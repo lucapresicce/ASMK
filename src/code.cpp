@@ -51,10 +51,10 @@ List BPS_combine(const List& fit_list, const int& K, const double& rp) {
 
   // Epd list
   List epd_0 = fit_list[0];
-  arma::mat out3 = as<arma::mat>(epd_0[2]);
+  arma::mat out3 = as<arma::mat>(epd_0[0]);
   for (int i = 1; i < K; ++i) {
     List epd_i = fit_list[i];
-    out3 = join_vert(out3, as<arma::mat>(epd_i[2]));
+    out3 = join_vert(out3, as<arma::mat>(epd_i[0]));
   }
 
   // Calculate weighted scores
@@ -99,7 +99,7 @@ List BPS_PseudoBMA(const List& fit_list) {
   for (int i = 0; i < K; ++i) {
     List ls = fit_list[i];
     W_list[i] = as<arma::mat>(ls[1]);
-    out3[i] = as<arma::mat>(ls[2]);
+    out3[i] = as<arma::mat>(ls[0]);
   }
 
   int nn = as<arma::mat>(out3[0]).n_rows;
@@ -157,9 +157,9 @@ List BPS_PseudoBMA(const List& fit_list) {
 List fit_cpp(const List& data, const List& priors, const arma::mat& coords, const List& hyperpar) {
 
   // Unpack data and priors
-  vec Y = as<arma::mat>(data["Y"]);
+  arma::mat Y = as<arma::mat>(data["Y"]);
   arma::mat X = as<arma::mat>(data["X"]);
-  vec mu_b = as<vec>(priors["mu_b"]);
+  arma::vec mu_b = as<arma::vec>(priors["mu_b"]);
   arma::mat V_b = as<arma::mat>(priors["V_b"]);
   double b = as<double>(priors["b"]);
   double a = as<double>(priors["a"]);
@@ -167,51 +167,35 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
   double phi = as<double>(hyperpar["phi"]);
 
   int n = Y.n_rows;
-  int p = X.n_cols;
-  // arma::mat d_s = C_dist(coords);
+
   arma::mat d_s = arma_dist(coords);
   arma::mat Rphi_s = exp(-phi * d_s);
 
-  // build the aumentend linear sistem
-  vec zer_n(n, arma::fill::zeros);
-  vec Y_star = join_vert(Y, mu_b, zer_n);
-
-  arma::mat Zer_np(n, p, arma::fill::zeros);
-  arma::mat Zer_pn = trans(Zer_np);
-  arma::mat X_1 = join_vert(X, eye<arma::mat>(p, p), Zer_np);
-  arma::mat X_2 = join_vert(eye<arma::mat>(n, n), Zer_pn, eye<arma::mat>(n, n));
-  arma::mat X_star = join_horiz(X_1, X_2);
-
-  // arma::mat V_1 = join_vert(delta*eye<arma::mat>(n, n), arma::mat(p+n, n, arma::fill::zeros));
-  // arma::mat V_2 = join_vert(arma::mat(n, p, arma::fill::zeros), V_b, arma::mat(n, p, arma::fill::zeros));
-  // arma::mat V_3 = join_vert(arma::mat(n+p, n, arma::fill::zeros), Rphi_s);
-  // arma::mat V_star = join_horiz(V_1, V_2, V_3);
-
-  arma::mat iV_1 = join_vert((1/delta)*eye<arma::mat>(n, n), arma::mat(p+n, n, arma::fill::zeros));
-  arma::mat iV_2 = join_vert(Zer_np, arma::inv(V_b), Zer_np);
-  arma::mat iRphi_s = arma::inv(Rphi_s);
-  arma::mat iV_3 = join_vert(arma::mat(n+p, n, arma::fill::zeros), iRphi_s);
-  arma::mat iV_star = join_horiz(iV_1, iV_2, iV_3);
-
   // Precompute some reusable values
-  arma::mat tX_star = trans(X_star);
-  // arma::mat iV_star = arma::inv(V_star);
+  double d = (1 / delta);
+  arma::mat tX = trans(X);
+  arma::mat iV_b = arma::inv(V_b);
+  arma::mat iR_s = arma::inv(Rphi_s);
 
-  // conjugate posterior parameters
-  arma::mat iM_star = tX_star * iV_star * X_star;
+  // Compute posterior updating
+  arma::mat iM_B = d * tX * X + iV_b;
+  arma::mat iM_BW = d * tX;
+  arma::mat iM_WB = trans(iM_BW);
+  arma::mat iM_W = iR_s + (d * eye<arma::mat>(n, n));
+
+  arma::mat iM_star1 = join_horiz(iM_B, iM_BW);
+  arma::mat iM_star2 = join_horiz(iM_WB, iM_W);
+  arma::mat iM_star = join_vert( iM_star1, iM_star2);
   arma::mat M_star = arma::inv(iM_star);
-  arma::mat tXVY = tX_star * iV_star * Y_star;
-  arma::vec gamma_hat = M_star * tXVY;
 
-  arma::mat Xgam = X_star * gamma_hat;
-  arma::mat SXY = Y_star - (Xgam);
-  arma::mat tSXY = trans(SXY);
-  // arma::mat SXY = Y_star - (X_star * gamma_hat);
-  // arma::mat tSXY = trans(Y_star - (X_star * gamma_hat));
+  arma::vec M = join_vert( (d * tX * Y) + (iV_b * mu_b) , d * Y );
+  arma::vec gamma_hat = M_star * M;
 
-  arma::mat bb = tSXY * iV_star * SXY;
+  double dYY = as_scalar(d * trans(Y) * Y);
+  double mbVbmb = as_scalar(trans(mu_b) * iV_b * mu_b);
+  double bb = dYY + mbVbmb + as_scalar(trans(gamma_hat) * iM_star * gamma_hat) - as_scalar(2 * trans(gamma_hat) * M);
+
   double b_star = b + 0.5 * as_scalar(bb);
-
   double a_star = a + (n/2);
 
   // Return results as an R list
@@ -219,7 +203,7 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
                       Named("gamma_hat") = gamma_hat,
                       Named("b_star") = b_star,
                       Named("a_star") = a_star,
-                      Named("iRphi_s") = iRphi_s);
+                      Named("iRphi_s") = iR_s);
 }
 
 
@@ -269,11 +253,10 @@ List post_draws(const List& poster, const int& R, const bool& par, const int& p)
 }
 
 
-//' Draw from the conditional posterior predictive for a set of unobserved covariates
+//' Draw from the joint posterior predictive for a set of unobserved covariates
 //'
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 //' @param X_u [matrix] unobserved instances covariate matrix
-//' @param iRphi_s [matrix] inverse of the sample correlation matrix
 //' @param d_u [matrix] unobserved instances distance matrix
 //' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
@@ -282,7 +265,7 @@ List post_draws(const List& poster, const int& R, const bool& par, const int& p)
 //' @return [list] posterior predictive samples
 //'
 // [[Rcpp::export]]
-Rcpp::List r_pred_cpp(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
+Rcpp::List r_pred_joint(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
 
   // Unpack data, posterior sample and hyperparameters
   arma::mat Y = as<arma::mat>(data["Y"]);
@@ -301,8 +284,8 @@ Rcpp::List r_pred_cpp(const List& data, const arma::mat& X_u, const arma::mat& d
   int n = d_us.n_rows-m;
 
   // R environment
-  Rcpp::Environment mvtnorm = Rcpp::Environment::namespace_env("mvtnorm");
-  Rcpp::Function rmvt_R = mvtnorm["rmvt"];
+  Rcpp::Environment mvnfast = Rcpp::Environment::namespace_env("mvnfast");
+  Rcpp::Function rmvt_R = mvnfast["rmvt"];
 
   // (exponential) covariance matrices
   arma::mat Rphi_u = exp(-phi * d_u);
@@ -323,16 +306,163 @@ Rcpp::List r_pred_cpp(const List& data, const arma::mat& X_u, const arma::mat& d
   arma::mat M_tilde = (W * M_star * trans(W)) + M2;
 
   // degrees of freedom
-  double t_df = 2*a_star;
+  double t_df = a_star;
   double scale_ratio = b_star/a_star;
+  arma::mat scaled_M_tilde = forceSymmetry_cpp(scale_ratio * M_tilde);
 
   // posterior predictive sample
-  arma::mat res = as<arma::mat>(rmvt_R(Named("n", R), Named("sigma", scale_ratio*M_tilde), Named("delta", mu_tilde), Named("df", t_df)));
+  arma::mat res;
+  res = as<arma::mat>(rmvt_R(Named("n", R), Named("sigma", scaled_M_tilde), Named("mu", mu_tilde), Named("df", t_df)));
 
   return List::create(Named("W_u") = res.cols(0, m-1),
                       Named("Y_u") = res.cols(m, (2*m)-1));
 
 }
+
+
+//' Draw from the marginals posterior predictive for a set of unobserved covariates
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
+//'
+//' @return [list] posterior predictive samples
+//'
+// [[Rcpp::export]]
+Rcpp::List r_pred_marg(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
+
+  // Unpack data, posterior sample and hyperparameters
+  arma::mat Y = as<arma::mat>(data["Y"]);
+  arma::mat X = as<arma::mat>(data["X"]);
+  double delta = as<double>(hyperpar["delta"]);
+  double phi = as<double>(hyperpar["phi"]);
+  arma::mat iRphi_s = as<arma::mat>(poster["iRphi_s"]);
+  arma::mat M_star = as<arma::mat>(poster["M_star"]);
+  arma::vec gamma_hat = as<arma::vec>(poster["gamma_hat"]);
+  double a_star = as<double>(poster["a_star"]);
+  double b_star = as<double>(poster["b_star"]);
+
+  // extract info from data
+  int m = X_u.n_rows;
+  int p = X_u.n_cols;
+  int n = d_us.n_rows-m;
+
+  // R environment
+  Rcpp::Environment mvnfast = Rcpp::Environment::namespace_env("mvnfast");
+  Rcpp::Function rmvt_R = mvnfast["rmvt"];
+
+  // (exponential) covariance matrices
+  arma::mat Rphi_u = exp(-phi * d_u);
+  arma::mat Rphi_us = exp(-phi * d_us.submat(0, m, m-1, m+n-1));
+
+  // compute posterior predictive parameters
+  arma::mat JR = Rphi_us * iRphi_s;
+
+  // latent process
+  arma::mat Zer_mp(m, p, arma::fill::zeros);
+  arma::mat W_w = join_horiz(Zer_mp, JR);
+  arma::vec mu_tilde_w = W_w * gamma_hat;
+  arma::mat V_w = Rphi_u - JR * trans(Rphi_us);
+  arma::mat M_tilde_w = (W_w * M_star * trans(W_w)) + V_w;
+
+  // response
+  arma::mat W_y = join_horiz(X_u, JR);
+  arma::vec mu_tilde_y = W_y * gamma_hat;
+  arma::mat V_ey = V_w + (delta*eye<arma::mat>(m, m));
+  arma::mat M_tilde_y = (W_y * M_star * trans(W_y)) + V_ey;
+
+  // degrees of freedom
+  double t_df = a_star;
+  double scale_ratio = b_star/a_star;
+  // arma::mat scaled_M_tilde_w = forceSymmetry_cpp(scale_ratio * M_tilde_w);
+  // arma::mat scaled_M_tilde_y = forceSymmetry_cpp(scale_ratio * M_tilde_y);
+
+  // posterior predictive sample
+  arma::mat res_w;
+  arma::mat res_y;
+  res_w = as<arma::mat>(rmvt_R(Named("n", R), Named("sigma", scale_ratio * M_tilde_w), Named("mu", mu_tilde_w), Named("df", t_df)));
+  res_y = as<arma::mat>(rmvt_R(Named("n", R), Named("sigma", scale_ratio * M_tilde_y), Named("mu", mu_tilde_y), Named("df", t_df)));
+
+  return List::create(Named("W_u") = res_w,
+                      Named("Y_u") = res_y);
+
+}
+
+
+//' Draw from the conditional posterior predictive for a set of unobserved covariates
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param post [list] output from \code{post_draws} function
+//'
+//' @return [list] posterior predictive samples
+//'
+// [[Rcpp::export]]
+List r_pred_cond(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const List& post) {
+
+   // Unpack data, posterior sample and hyperparameters
+   arma::mat beta = as<arma::mat>(post["Betas"]);
+   arma::vec sigma = as<arma::vec>(post["Sigmas"]);
+   arma::mat Y = as<arma::mat>(data["Y"]);
+   arma::mat X = as<arma::mat>(data["X"]);
+   arma::mat iRphi_s = as<arma::mat>(poster["iRphi_s"]);
+   double delta = as<double>(hyperpar["delta"]);
+   double phi = as<double>(hyperpar["phi"]);
+
+   // extract info from data
+   int m = X_u.n_rows;
+   int p = X_u.n_cols;
+   int n = d_us.n_rows-m;
+   int R = beta.n_rows;
+
+   // covariance matrices
+   // arma::mat iR_s = arma::inv(Rphi_s);
+   arma::mat Rphi_u = exp(-phi * d_u);
+   arma::mat Rphi_us = exp(-phi * d_us.submat(0, m, m-1, m+n-1));
+
+   // environment
+   Rcpp::Environment mniw = Rcpp::Environment::namespace_env("mniw");
+   Rcpp::Function rmNorm_R = mniw["rmNorm"];
+   //
+   // initialize return objects
+   arma::mat Z_u(m, R);
+   arma::mat Y_u(m, R);
+
+   // compute reusable
+   arma::mat RiR = Rphi_us * iRphi_s;
+   arma::mat V_z = Rphi_u - RiR * trans(Rphi_us);
+
+   for (int r = 0; r < R; ++r) {
+
+     // unpack posterior sample
+     arma::vec gamma_hat_r = trans(beta.row(r));
+     arma::vec b = gamma_hat_r.subvec(0, p - 1);
+     arma::vec gamma_r = gamma_hat_r.subvec(p, gamma_hat_r.n_elem - 1);
+     double s = sigma(r);
+
+
+     // predictive conjugate parameters
+     // arma::mat mu_z = Rphi_us * iR_s * gamma_r;
+     // arma::mat V_z = Rphi_u - Rphi_us * iR_s * trans(Rphi_us);
+     arma::mat mu_z = RiR * gamma_r;
+     Z_u.col(r) = as<arma::vec>(rmNorm_R(Named("n", 1), Named("mu", trans(mu_z)), Named("Sigma", s * V_z)));
+
+     arma::mat mu_y = X_u * b + Z_u.col(r);
+     arma::mat V_y = (s * delta) * eye<arma::mat>(m, m);
+     Y_u.col(r) = as<arma::vec>(rmNorm_R(Named("n", 1), Named("mu", trans(mu_y)), Named("Sigma", V_y)));
+
+   }
+
+   return List::create(Named("Z_u") = Z_u,
+                       Named("Y_u") = Y_u);
+ }
 
 
 //' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
@@ -367,8 +497,8 @@ double d_pred_cpp(const List& data, const arma::mat& X_u, const arma::vec& Y_u, 
   int n = d_us.n_rows-m;
 
   // R environment
-  Rcpp::Environment mvtnorm = Rcpp::Environment::namespace_env("mvtnorm");
-  Rcpp::Function dmvt_R = mvtnorm["dmvt"];
+  Rcpp::Environment mvnfast = Rcpp::Environment::namespace_env("mvnfast");
+  Rcpp::Function dmvt_R = mvnfast["dmvt"];
 
   // (exponential) covariance matrices
   arma::mat Rphi_u = exp(-phi * d_u);
@@ -386,12 +516,10 @@ double d_pred_cpp(const List& data, const arma::mat& X_u, const arma::vec& Y_u, 
   // degrees of freedom
   double t_df = a_star;
   double scale_ratio = b_star/a_star;
-
-  // Rcout << "delta: " << mu_tilde << std::endl;
-  // Rcout << "sigma: " << scale_ratio*M_tilde << std::endl;
+  arma::mat scaled_M_tilde = forceSymmetry_cpp(scale_ratio * M_tilde);
 
   // posterior predictive density
-  double P_u = as_scalar(as<arma::vec>(dmvt_R(Named("x", trans(Y_u)), Named("sigma", scale_ratio*M_tilde), Named("delta", mu_tilde), Named("df", t_df), Named("log", false))));
+  double P_u = as_scalar(as<arma::vec>(dmvt_R(Named("X", trans(Y_u)), Named("sigma", scaled_M_tilde), Named("mu", mu_tilde), Named("df", t_df), Named("log", false))));
 
   return P_u;
 }
@@ -671,7 +799,7 @@ List BPS_pred(const List& data, const arma::mat& X_u, const List& priors, const 
     List poster = fit_cpp(data, priors, coords, hmod);
 
     // draw from posterior predictive
-    List pred_R = r_pred_cpp(data, X_u, d_u, d_us, hmod, poster, 1);
+    List pred_R = r_pred_marg(data, X_u, d_u, d_us, hmod, poster, 1);
 
     arma::vec W_pred_r = pred_R["W_u"];
     W_pred =  join_horiz(W_pred, W_pred_r);
@@ -684,6 +812,84 @@ List BPS_pred(const List& data, const arma::mat& X_u, const List& priors, const 
   // return pred;
   return List::create(Named("W_hat") = W_pred,
                       Named("Y_hat") = Y_pred);
+
+}
+
+
+//' Perform the BPS sampling from posterior and posterior predictive given a set of stacking weights
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
+//'
+//' @return [list] BPS posterior predictive samples
+//' @export
+// [[Rcpp::export]]
+List BPS_post(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+
+  arma::mat Z_pred;
+  arma::mat Y_pred;
+  arma::mat Betas;
+  arma::vec Sigmas(R);
+
+  // compute distance matrices
+  arma::mat d_u = arma_dist(crd_u);
+  arma::mat crd_us = join_cols(crd_u, coords);
+  arma::mat d_us = arma_dist(crd_us);
+
+  for(int r = 0; r < R; r++) {
+
+   // build the grid of hyperparameters
+   arma::vec Delta = hyperpar["delta"];
+   arma::vec Fi = hyperpar["phi"];
+   arma::mat Grid = expand_grid_cpp(Delta, Fi);
+   int k = Grid.n_rows;
+
+   // sample the model
+   arma::uvec kmod = sample_index(k, 1, W);
+   arma::uword k_mod = kmod(0);
+
+   // identify the k-th model
+   arma::rowvec hpar = Grid.row(k_mod);
+   double delt = hpar[0];
+   double fi = hpar[1];
+   List hmod = List::create(
+     Named("delta") = delt,
+     Named("phi") = fi);
+
+   // fit your model on the training data
+   List poster = fit_cpp(data, priors, coords, hmod);
+
+   // posterior draws
+   List post = post_draws(poster, 1);
+
+   // save posterior samples
+   arma::mat beta = as<arma::mat>(post["Betas"]);
+   arma::vec sigma = as<arma::vec>(post["Sigmas"]);
+   Betas =  join_vert(Betas, beta);
+   Sigmas(r) =  sigma(0);
+
+   // draw from conditional posterior predictive
+   List pred_R = r_pred_cond(data, X_u, d_u, d_us, hmod, poster, post);
+
+   arma::vec Z_pred_r = as<arma::mat>(pred_R["Z_u"]);
+   Z_pred =  join_horiz(Z_pred, Z_pred_r);
+
+   arma::vec Y_pred_r = as<arma::mat>(pred_R["Y_u"]);
+   Y_pred =  join_horiz(Y_pred, Y_pred_r);
+
+  }
+
+  // return pred;
+  return List::create(Named("Z_hat") = Z_pred,
+                     Named("Y_hat") = Y_pred,
+                     Named("Betas") = Betas,
+                     Named("Sigmas") = Sigmas);
 
 }
 
@@ -915,7 +1121,7 @@ List post_draws_MvT(const List& poster, const int& R, const bool& par, const int
 }
 
 
-//' Draw from the conditional posterior predictive for a set of unobserved covariates
+//' Draw from the joint posterior predictive for a set of unobserved covariates
 //'
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 //' @param X_u [matrix] unobserved instances covariate matrix
@@ -928,7 +1134,7 @@ List post_draws_MvT(const List& poster, const int& R, const bool& par, const int
 //' @return [list] posterior predictive samples
 //'
 // [[Rcpp::export]]
-List r_pred_cpp_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
+List r_pred_joint_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
 
   // Unpack data, posterior sample and hyperparameters
   arma::mat Y = as<arma::mat>(data["Y"]);
@@ -990,6 +1196,160 @@ List r_pred_cpp_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_u
                       Named("Yu") = yu);
 
 }
+
+
+//' Draw from the joint posterior predictive for a set of unobserved covariates
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp} function
+//' @param R [integer] number of posterior predictive samples
+//'
+//' @return [list] posterior predictive samples
+//'
+ // [[Rcpp::export]]
+ List r_pred_marg_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const int& R) {
+
+   // Unpack data, posterior sample and hyperparameters
+   arma::mat Y = as<arma::mat>(data["Y"]);
+   arma::mat X = as<arma::mat>(data["X"]);
+   double alpha = as<double>(hyperpar["alpha"]);
+   double phi = as<double>(hyperpar["phi"]);
+   arma::mat iRphi_s = as<arma::mat>(poster["iRphi_s"]);
+   arma::mat V_star = as<arma::mat>(poster["V_star"]);
+   arma::mat mu_star = as<arma::mat>(poster["mu_star"]);
+   arma::mat Psi_star = as<arma::mat>(poster["Psi_star"]);
+   double nu_star = as<double>(poster["nu_star"]);
+
+   // extract info from data
+   int m = X_u.n_rows;
+   int n = d_us.n_rows-m;
+   int p = X_u.n_cols;
+
+   // covariance matrices
+   arma::mat Rphi_u = exp(-phi * d_u);
+   arma::mat Rphi_us = exp(-phi * d_us.submat(0, m, m-1, m+n-1));
+
+   // sampling environment
+   Rcpp::Environment mniw = Rcpp::Environment::namespace_env("mniw");
+   Rcpp::Function rMT_R = mniw["rMT"];
+
+   // compute posterior predictive parameters
+   arma::mat Mu = Rphi_us * iRphi_s;
+
+   // latent process
+   arma::mat Zer_mp(m, p, arma::fill::zeros);
+   arma::mat M_gamma_w = join_horiz(Zer_mp, Mu);
+   arma::mat mu_tilde_w = M_gamma_w * mu_star;
+   arma::mat V_wu = Rphi_u - (Mu * trans(Rphi_us));
+   arma::mat M_tilde_w = (M_gamma_w * V_star * trans(M_gamma_w)) + V_wu;
+
+   // response
+   arma::mat M_gamma_y = join_horiz(X_u, Mu);
+   arma::mat mu_tilde_y = M_gamma_y * mu_star;
+   arma::mat V_ey = V_wu + (((1/alpha)-1)*eye<arma::mat>(m, m));
+   arma::mat M_tilde_y = (M_gamma_y * V_star * trans(M_gamma_y)) + V_ey;
+
+   // sample from posterior predictive distribution
+   arma::cube smp_cube_w;
+   arma::cube smp_cube_y;
+
+   if (R > 1) {
+     // For R greater than 1, we directly obtain the cube
+     smp_cube_w = as<arma::cube>(rMT_R(Named("n", R), Named("Lambda", mu_tilde_w), Named("SigmaR", M_tilde_w), Named("SigmaC", Psi_star), Named("nu", nu_star)));
+     smp_cube_y = as<arma::cube>(rMT_R(Named("n", R), Named("Lambda", mu_tilde_y), Named("SigmaR", M_tilde_y), Named("SigmaC", Psi_star), Named("nu", nu_star)));
+
+   } else {
+     // For R equal to 1, we obtain the matrix and reshape it into a cube
+     arma::mat smp_mat_w = as<arma::mat>(rMT_R(Named("n", R), Named("Lambda", mu_tilde_w), Named("SigmaR", M_tilde_w), Named("SigmaC", Psi_star), Named("nu", nu_star)));
+     smp_cube_w = arma::cube(smp_mat_w.memptr(), smp_mat_w.n_rows, smp_mat_w.n_cols, 1);
+     arma::mat smp_mat_y = as<arma::mat>(rMT_R(Named("n", R), Named("Lambda", mu_tilde_y), Named("SigmaR", M_tilde_y), Named("SigmaC", Psi_star), Named("nu", nu_star)));
+     smp_cube_y = arma::cube(smp_mat_y.memptr(), smp_mat_y.n_rows, smp_mat_y.n_cols, 1);
+
+   }
+
+   return List::create(Named("Wu") = smp_cube_w,
+                       Named("Yu") = smp_cube_y);
+
+ }
+
+//' Draw from the conditional posterior predictive for a set of unobserved covariates
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param d_u [matrix] unobserved instances distance matrix
+//' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+//' @param poster [list] output from \code{fit_cpp_MvT} function
+//' @param post [list] output from \code{post_draws_MvT} function
+//'
+//' @return [list] posterior predictive samples
+//'
+// [[Rcpp::export]]
+List r_pred_cond_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_u, const arma::mat& d_us, const List& hyperpar, const List& poster, const List& post) {
+
+   // Unpack data, posterior sample and hyperparameters
+   arma::mat Y = as<arma::mat>(data["Y"]);
+   arma::mat X = as<arma::mat>(data["X"]);
+   arma::mat iR_s = as<arma::mat>(poster["iRphi_s"]);
+   double alpha = as<double>(hyperpar["alpha"]);
+   double phi = as<double>(hyperpar["phi"]);
+
+   // extract info from data
+   int m = X_u.n_rows;
+   int n = d_us.n_rows-m;
+   int p = X_u.n_cols;
+   int q = Y.n_cols;
+   int R = post.size();
+
+   // covariance matrices
+   arma::mat Rphi_u = exp(-phi * d_u);
+   arma::mat Rphi_us = exp(-phi * d_us.submat(0, m, m-1, m+n-1));
+
+   // sampling environment
+   Rcpp::Environment mniw = Rcpp::Environment::namespace_env("mniw");
+   Rcpp::Function rMNorm_R = mniw["rMNorm"];
+
+   // compute reusable
+   arma::mat M_u = Rphi_us * iR_s;
+   arma::mat V_u = Rphi_u - (M_u * trans(Rphi_us));
+
+   // initialize return objects
+   arma::cube smp_cube_w(m, q, R);
+   arma::cube smp_cube_y(m, q, R);
+
+   for (int r = 0; r < R; ++r) {
+
+     List smp = post(r);
+     arma::mat beta = as<arma::mat>(smp["beta"]);
+     arma::mat sigma = as<arma::mat>(smp["sigma"]);
+
+     // predictive conjugate parameters
+     arma::mat b = beta.rows(0, p - 1);
+     arma::mat w = beta.rows(p, (n+p) - 1);
+
+     // prediction W_u
+     arma::mat mu_u = M_u * w;
+     arma::mat resultW = as<arma::mat>(rMNorm_R(Named("n", 1), Named("Lambda", mu_u), Named("SigmaR", V_u), Named("SigmaC", sigma)));
+
+     // prediction Y_u
+     arma::mat mu_y = X_u * b + resultW;
+     double a = alpha / (1 - alpha);
+     arma::mat V_y = a * eye<arma::mat>(m, m);
+     arma::mat resultY = as<arma::mat>(rMNorm_R(Named("n", 1), Named("Lambda", mu_y), Named("SigmaR", V_y), Named("SigmaC", sigma)));
+
+     smp_cube_w.slice(r) = resultW;
+     smp_cube_y.slice(r) = resultY;
+
+   }
+
+   return List::create(Named("Wu") = smp_cube_w,
+                       Named("Yu") = smp_cube_y);
+
+ }
 
 
 //' Evaluate the density of a set of unobserved response with respect to the conditional posterior predictive
@@ -1236,9 +1596,9 @@ arma::mat models_dens_MvT(const List& data, const List& priors, const arma::mat&
 //' Compute the BPS weights by convex optimization
 //'
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
-//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 //' @param coords [matrix] sample coordinates for X and Y
-//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 //' @param K [integer] number of folds
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -1274,10 +1634,10 @@ List BPS_weights_MvT(const List& data, const List& priors, const arma::mat& coor
 //'
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 //' @param X_u [matrix] unobserved instances covariate matrix
-//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 //' @param coords [matrix] sample coordinates for X and Y
 //' @param crd_u [matrix] unboserved instances coordinates
-//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 //' @param W [matrix] set of stacking weights
 //' @param R [integer] number of desired samples
 //'
@@ -1317,7 +1677,7 @@ List BPS_pred_MvT(const List& data, const arma::mat& X_u, const List& priors, co
     List poster = fit_cpp_MvT(data, priors, coords, hmod);
 
     // draw from conditional posterior predictive
-    pred(r) = r_pred_cpp_MvT(data, X_u, d_u, d_us, hmod, poster, 1);
+    pred(r) = r_pred_marg_MvT(data, X_u, d_u, d_us, hmod, poster, 1);
 
   }
 
@@ -1325,12 +1685,76 @@ List BPS_pred_MvT(const List& data, const arma::mat& X_u, const List& priors, co
 
 }
 
+
+//' Perform the BPS sampling from posterior and posterior predictive given a set of stacking weights
+//'
+//' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
+//' @param X_u [matrix] unobserved instances covariate matrix
+//' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
+//' @param coords [matrix] sample coordinates for X and Y
+//' @param crd_u [matrix] unboserved instances coordinates
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
+//' @param W [matrix] set of stacking weights
+//' @param R [integer] number of desired samples
+//'
+//' @return [list] BPS posterior predictive samples
+//' @export
+// [[Rcpp::export]]
+List BPS_post_MvT(const List& data, const arma::mat& X_u, const List& priors, const arma::mat& coords, const arma::mat& crd_u, const List& hyperpar, const arma::vec& W, const int& R) {
+
+ List pred(R);
+ List post_smp(R);
+
+ // compute distance matrices
+ arma::mat d_u = arma_dist(crd_u);
+ arma::mat crd_us = join_cols(crd_u, coords);
+ arma::mat d_us = arma_dist(crd_us);
+
+ // build the grid of hyperparameters
+ arma::vec Alfa = hyperpar["alpha"];
+ arma::vec Fi = hyperpar["phi"];
+ arma::mat Grid = expand_grid_cpp(Alfa, Fi);
+ int k = Grid.n_rows;
+
+ // sample the model
+ arma::uvec kmod = sample_index(k, R, W);
+
+ for(int r = 0; r < R; r++) {
+
+   // identify the k-th model
+   arma::uword k_mod = kmod(r);
+   arma::rowvec hpar = Grid.row(k_mod);
+   double alfa = hpar[0];
+   double fi = hpar[1];
+   List hmod = List::create(
+     Named("alpha") = alfa,
+     Named("phi") = fi);
+
+   // fit your model on the training data
+   List poster = fit_cpp_MvT(data, priors, coords, hmod);
+
+   // posterior draws
+   List post = post_draws_MvT(poster, 1);
+   List drw = post(0);
+   post_smp(r) = drw;
+
+   // draw from conditional posterior predictive
+   pred(r) = r_pred_cond_MvT(data, X_u, d_u, d_us, hmod, poster, post);
+
+ }
+
+ return List::create(Named("Pred") = pred,
+                     Named("Post") = post_smp);
+
+}
+
+
 //' Compute the BPS posterior samples given a set of stacking weights
 //'
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
-//' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
+//' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 //' @param coords [matrix] sample coordinates for X and Y
-//' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
+//' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 //' @param W [matrix] set of stacking weights
 //' @param R [integer] number of desired samples
 //'

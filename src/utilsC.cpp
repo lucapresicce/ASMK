@@ -125,7 +125,22 @@ List subset_data(const List& data, int K) {
 }
 
 
+//' Function to subset data for meta-analysis
+//'
+//' @param mat [matrix] not-symmetric matrix
+//'
+//' @return [matrix] symmetric matrix (lower triangular of \code{mat} is used)
+//' @export
+// [[Rcpp::export]]
+arma::mat forceSymmetry_cpp(const arma::mat& mat) {
+  // Extract the lower triangular part of the matrix
+  arma::mat lower = arma::trimatl(mat);
 
+  // Create a symmetric matrix by copying the lower triangular part to the upper triangular part
+  arma::mat symmat = arma::symmatl(lower);
+
+  return symmat;
+}
 
 
 

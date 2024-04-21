@@ -9,11 +9,11 @@ BPS_postdraws_MvT(data, priors, coords, hyperpar, W, R, par)
 \arguments{
 \item{data}{\link{list} two elements: first named \eqn{Y}, second named \eqn{X}}
 
-\item{priors}{\link{list} priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}}
+\item{priors}{\link{list} priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}}
 
 \item{coords}{\link{matrix} sample coordinates for X and Y}
 
-\item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
+\item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 
 \item{W}{\link{matrix} set of stacking weights}
 

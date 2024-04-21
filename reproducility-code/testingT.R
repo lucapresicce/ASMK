@@ -1,5 +1,5 @@
 n <- 500
-u <- 10
+u <- 1000
 p <- 2
 
 # parameters
@@ -34,15 +34,39 @@ X_u <- X_or[-(1:n), ]
 W_u <- W_or[-(1:n), ]
 Y_u <- matrix(Y_or[-(1:n), ])
 
-
+tictoc::tic()
 fit1 <- fit_cpp(data   = list(Y = Y, X = X),
-                   priors = list(mu_b = rep(0, p),
-                                 V_b  = diag(10, p),
-                                 a    = 2,
-                                 b    = 2),
-                   coords   = crd_s,
-                   hyperpar = list(delta = 0.25,
-                                   phi   = 4))
+                priors = list(mu_b = rep(0, p),
+                              V_b  = diag(10, p),
+                              a    = 2,
+                              b    = 2),
+                coords   = crd_s,
+                hyperpar = list(delta = 0.25,
+                                phi   = 4))
+tictoc::toc()
+
+tictoc::tic()
+fit2 <- fit_cpp_optimized(data   = list(Y = Y, X = X),
+                priors = list(mu_b = rep(0, p),
+                              V_b  = diag(10, p),
+                              a    = 2,
+                              b    = 2),
+                coords   = crd_s,
+                hyperpar = list(delta = 0.25,
+                                phi   = 4))
+tictoc::toc()
+
+fit1$M_star
+fit2$M_star
+fit1$gamma_hat
+fit2$gamma_hat
+fit1$b_star
+fit2$b_star
+fit1$a_star
+fit2$a_star
+fit1$iRphi_s
+fit2$iRphi_s
+
 
 crd_us <- rbind(crd_u, crd_s)
 Rphi_us <- exp(-phi * as.matrix(dist(crd_us))[1:u, (u+1):(u+n)])
@@ -50,35 +74,67 @@ Rphi_us <- exp(-phi * as.matrix(dist(crd_us))[1:u, (u+1):(u+n)])
 # t univariate functions --------------------------------------------------
 
 prova4$W_u <- r_pred_T(data     = list(Y = Y, X = X),
-                   poster   = fit1,
-                   hyperpar = list(delta = 0.25,
-                                   phi   = 4),
-                   X_u      = X_u,
-                   d_u      = as.matrix(dist(crd_u)),
-                   d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
-                   R = 1)
+                       poster   = fit1,
+                       hyperpar = list(delta = 0.25,
+                                       phi   = 4),
+                       X_u      = X_u,
+                       d_u      = as.matrix(dist(crd_u)),
+                       d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                       R = 1)
 
 (prova4$W_u |> colMeans()-W_u)^2 |> mean() |> sqrt()
 (prova4$Y_u |> colMeans()-Y_u)^2 |> mean() |> sqrt()
 
+tictoc::tic()
+prova5 <- r_pred_cpp1(data     = list(Y = Y, X = X),
+                      hyperpar = list(delta = 0.25,
+                                      phi   = 4),
+                      X_u      = X_u,
+                      d_u      = as.matrix(dist(crd_u)),
+                      d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                      poster = fit1, R = 1)
+tictoc::toc()
+
+tictoc::tic()
+prova6 <- r_pred_cppHALF(data     = list(Y = Y, X = X),
+                         hyperpar = list(delta = 0.25,
+                                         phi   = 4),
+                         X_u      = X_u,
+                         d_u      = as.matrix(dist(crd_u)),
+                         d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                         poster = fit1, R = 1)
+tictoc::toc()
+
+tictoc::tic()
 prova4 <- r_pred_MC(data     = list(Y = Y, X = X),
-                     hyperpar = list(delta = 0.25,
-                                     phi   = 4),
-                     X_u      = X_u,
-                     d_u      = as.matrix(dist(crd_u)),
-                     d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
-                     post = post_draws(fit1, R = 250, par = F, p = 1),
-                     iRphi_s = fit1$iRphi_s)
+                    hyperpar = list(delta = 0.25,
+                                    phi   = 4),
+                    X_u      = X_u,
+                    d_u      = as.matrix(dist(crd_u)),
+                    d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                    post = post_draws(fit1, R = 1, par = F, p = 1),
+                    iRphi_s = fit1$iRphi_s)
+tictoc::toc()
+
+(prova4$W_u |> colMeans()-W_u)^2 |> mean() |> sqrt()
+(prova4$Y_u |> colMeans()-Y_u)^2 |> mean() |> sqrt()
+prova5$W_u |> colMeans() |> range()
+prova5$Y_u |> colMeans() |> range()
+prova6$W_u |> colMeans() |> range()
+prova6$Y_u |> colMeans() |> range()
 
 (prova4$Z_u |> rowMeans()-W_u)^2 |> mean() |> sqrt()
 (prova4$Y_u |> rowMeans()-Y_u)^2 |> mean() |> sqrt()
-
+prova4$Z_u |> rowMeans() |> range()
+prova4$Y_u |> rowMeans() |> range()
+W_u |> range()
+Y_u |> range()
 
 u_set <- 1#:nrow(X_u)
 d_pred_MC(data     = list(Y = Y, X = X),
           poster   = post_draws(fit1, R = 10, par = F, p = p),
           hyperpar = list(delta = 0.25,
-                         phi   = 4),
+                          phi   = 4),
           Y_u      = matrix(Y_u[u_set,]),
           X_u      = matrix(X_u[u_set,], ncol = p),
           d_u      = as.matrix(as.matrix(dist(crd_u[u_set,]))[u_set, u_set]),
@@ -97,13 +153,13 @@ d_pred_T(data     = list(Y = Y, X = X),
 
 tictoc::tic()
 P_u2 <- dens_loocvT(data   = list(Y = Y, X = X),
-                           priors = list(mu_b = rep(0, p),
-                                         V_b  = diag(10, p),
-                                         a    = 2,
-                                         b    = 2),
-                           coords   = crd_s,
-                           hyperpar = list(delta = 0.25,
-                                           phi   = 4))
+                    priors = list(mu_b = rep(0, p),
+                                  V_b  = diag(10, p),
+                                  a    = 2,
+                                  b    = 2),
+                    coords   = crd_s,
+                    hyperpar = list(delta = 0.25,
+                                    phi   = 4))
 tictoc::toc()
 
 hist(P_u)
@@ -125,13 +181,13 @@ dens_loocv(data   = list(Y = Y, X = X),
            g = 5)
 
 dens_loocvT(data   = list(Y = Y, X = X),
-                   priors = list(mu_b = rep(0, p),
-                                 V_b  = diag(10, p),
-                                 a    = 2,
-                                 b    = 2),
-                   coords   = crd_s,
-                   hyperpar = list(delta = 0.25,
-                                   phi   = 4))
+            priors = list(mu_b = rep(0, p),
+                          V_b  = diag(10, p),
+                          a    = 2,
+                          b    = 2),
+            coords   = crd_s,
+            hyperpar = list(delta = 0.25,
+                            phi   = 4))
 
 tictoc::tic()
 dens_kcv(data   = list(Y = Y, X = X),
@@ -148,14 +204,14 @@ tictoc::toc()
 
 tictoc::tic()
 dens_kcvT(data   = list(Y = Y, X = X),
-                 priors = list(mu_b = rep(0, p),
-                               V_b  = diag(10, p),
-                               a    = 2,
-                               b    = 2),
-                 coords   = crd_s,
-                 hyperpar = list(delta = 0.25,
-                                 phi   = 4),
-                 K = 5)
+          priors = list(mu_b = rep(0, p),
+                        V_b  = diag(10, p),
+                        a    = 2,
+                        b    = 2),
+          coords   = crd_s,
+          hyperpar = list(delta = 0.25,
+                          phi   = 4),
+          K = 5)
 tictoc::toc()
 
 tictoc::tic()
@@ -174,15 +230,15 @@ tictoc::toc()
 
 tictoc::tic()
 scores2 <- models_densT(data   = list(Y = Y, X = X),
-                               priors = list(mu_b = rep(0, p),
-                                             V_b  = diag(10, p),
-                                             a    = 2,
-                                             b    = 2),
-                               coords   = crd_s,
-                               hyperpar = list(delta = c(0.15, 0.25, 0.35),
-                                               phi   = c(3, 4)),
-                               useKCV = T,
-                               K = 5)
+                        priors = list(mu_b = rep(0, p),
+                                      V_b  = diag(10, p),
+                                      a    = 2,
+                                      b    = 2),
+                        coords   = crd_s,
+                        hyperpar = list(delta = c(0.15, 0.25, 0.35),
+                                        phi   = c(3, 4)),
+                        useKCV = T,
+                        K = 5)
 tictoc::toc()
 
 conv_opt(scores = scores1) |> round(2)
@@ -194,14 +250,14 @@ subdata <- subset_data(data = list(Y = Y, X = X, crd = crd_s), K = 5)
 
 tictoc::tic()
 BPS_weightsT(data   = list(Y = Y, X = X),
-                    priors = list(mu_b = rep(0, p),
-                                  V_b  = diag(10, p),
-                                  a    = 2,
-                                  b    = 2),
-                    coords   = crd_s,
-                    hyperpar = list(delta = c(0.15, 0.25, 0.35),
-                                    phi   = c(3, 4, 5)),
-                    K = 5)
+             priors = list(mu_b = rep(0, p),
+                           V_b  = diag(10, p),
+                           a    = 2,
+                           b    = 2),
+             coords   = crd_s,
+             hyperpar = list(delta = c(0.15, 0.25, 0.35),
+                             phi   = c(3, 4, 5)),
+             K = 5)
 tictoc::toc()
 
 fit_list <- vector(mode = "list", length = K)
@@ -211,14 +267,14 @@ for (k in 1:K) {
   crd_k <- subdata$crd_list[[k]]
 
   fit_list[[k]] <- BPS_weightsT(data   = data_k,
-                                       priors = list(mu_b = rep(0, p),
-                                                     V_b  = diag(10, p),
-                                                     a    = 2,
-                                                     b    = 2),
-                                       coords   = crd_k,
-                                       hyperpar = list(delta = c(0.25, 0.35),
-                                                       phi   = c(4, 5)),
-                                       K = 5)
+                                priors = list(mu_b = rep(0, p),
+                                              V_b  = diag(10, p),
+                                              a    = 2,
+                                              b    = 2),
+                                coords   = crd_k,
+                                hyperpar = list(delta = c(0.25, 0.35),
+                                                phi   = c(4, 5)),
+                                K = 5)
 
 }
 
@@ -228,17 +284,17 @@ wbma <- BPS_combine(fit_list = fit_list, K = 5, rp = 1)
 # wbma <- BPS_PseudoBMA(fit_list = fit_list)
 
 BPS_predT(data     = list(Y = Y, X = X),
-                 X_u      = X_u,
-                 crd_u    = crd_u,
-                 coords   = crd_s,
-                 hyperpar = list(delta = c(0.25, 0.35),
-                                 phi   = c(4, 5)),
-                 priors   = list(mu_b = rep(0, p),
-                                 V_b  = diag(10, p),
-                                 a    = 2,
-                                 b    = 2),
-                 W        = wbma$W_list[[1]],
-                 R        = 5)
+          X_u      = X_u,
+          crd_u    = crd_u,
+          coords   = crd_s,
+          hyperpar = list(delta = c(0.25, 0.35),
+                          phi   = c(4, 5)),
+          priors   = list(mu_b = rep(0, p),
+                          V_b  = diag(10, p),
+                          a    = 2,
+                          b    = 2),
+          W        = wbma$W_list[[1]],
+          R        = 5)
 
 r <- 20
 predic1 <- vector(mode = "list", length = r)
@@ -251,17 +307,17 @@ while (j <= r) {
   W_k    <- wbma$W_list[[k]]
 
   predic1[[j]] <- BPS_predT(data     = data_k,
-                                   X_u      = X_u,
-                                   crd_u    = crd_u,
-                                   coords   = crd_k,
-                                   hyperpar = list(delta = c(0.25, 0.35),
-                                                   phi   = c(4, 5)),
-                                   priors   = list(mu_b = rep(0, p),
-                                                   V_b  = diag(10, p),
-                                                   a    = 2,
-                                                   b    = 2),
-                                   W        = W_k,
-                                   R        = 5)
+                            X_u      = X_u,
+                            crd_u    = crd_u,
+                            coords   = crd_k,
+                            hyperpar = list(delta = c(0.25, 0.35),
+                                            phi   = c(4, 5)),
+                            priors   = list(mu_b = rep(0, p),
+                                            V_b  = diag(10, p),
+                                            a    = 2,
+                                            b    = 2),
+                            W        = W_k,
+                            R        = 5)
 
   j <- j+1
 
@@ -275,18 +331,18 @@ Ymap <- sapply(1:r, function(j)predic1[[j]]$Y_hat) |> rowMeans()
 
 
 spPredict_ASMK(data     = list(Y = Y, X = X),
-                       X_u      = X_u,
-                       crd_u    = crd_u,
-                       coords   = crd_s,
-                       hyperpar = list(delta = c(0.25, 0.35),
-                                       phi   = c(4, 5)),
-                       priors   = list(mu_b = rep(0, p),
-                                       V_b  = diag(10, p),
-                                       a    = 2,
-                                       b    = 2),
-                       W        = wbma$W_list[[1]],
-                       R        = 5,
-                       J = 5)
+               X_u      = X_u,
+               crd_u    = crd_u,
+               coords   = crd_s,
+               hyperpar = list(delta = c(0.25, 0.35),
+                               phi   = c(4, 5)),
+               priors   = list(mu_b = rep(0, p),
+                               V_b  = diag(10, p),
+                               a    = 2,
+                               b    = 2),
+               W        = wbma$W_list[[1]],
+               R        = 5,
+               J = 5)
 
 test1 <- spASMKTversion(data     = list(Y = Y, X = X, crd = crd_s),
                         priors   = list(mu_b = rep(0, p),

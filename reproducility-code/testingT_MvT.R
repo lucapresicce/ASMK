@@ -1,8 +1,8 @@
 # testing closed form predictive MULTIVARIATE
 
 # generate data
-n <- 100
-u <- 10
+n <- 500
+u <- 1000
 p <- 2
 q <- 2
 
@@ -36,15 +36,16 @@ Y_u   <- Y_or[-(1:n), ]
 
 # fit, post and pred ------------------------------------------------------
 
-fit1 <- fit_latent_cpp(data   = list(Y = Y, X = X),
-                       priors = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                     V_r = diag(10, p),
-                                     Psi = diag(1, q),
-                                     nu = 3),
-                       coords   = crd_s,
-                       hyperpar = list(alpha = c(0.8),
-                                       phi   = c(4)))
-
+tictoc::tic()
+fit1 <- fit_cpp_MvT(data   = list(Y = Y, X = X),
+                    priors = list(mu_B = matrix(0, nrow = p, ncol = q),
+                                  V_r = diag(10, p),
+                                  Psi = diag(1, q),
+                                  nu = 3),
+                    coords   = crd_s,
+                    hyperpar = list(alpha = c(0.8),
+                                    phi   = c(4)))
+tictoc::toc()
 
 crd_us <- rbind(crd_u, crd_s)
 Rphi_us <- exp(-phi * as.matrix(dist(crd_us))[1:u, (u+1):(u+n)])
@@ -60,34 +61,72 @@ fit1 <- fit_latent_cpp(data   = list(Y = Y, X = X),
                        hyperpar = list(alpha = c(0.8),
                                        phi   = c(4)))
 
-post1 <- post_draws_latent(poster = fit1,
-                        R      = 100,
+tictoc::tic()
+post1 <- post_draws_MvT(poster = fit1,
+                        R      = 1,
                         par    = F,
                         p      = p)
+tictoc::toc()
 
 post1$Sigmas |> mean()
 post1$Betas |> colMeans()
 
-pred1 <- r_pred_latent_cpp(data     = list(Y = Y, X = X),
-                    poster     = fit1,
-                    hyperpar = list(alpha = 0.8,
-                                    phi   = 4),
-                    X_u      = X_u,
-                    d_u      = as.matrix(dist(crd_u)),
-                    d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
-                    beta = post1)
 
-pred1 <- r_pred_latent_cppT(data     = list(Y = Y, X = X),
+tictoc::tic()
+pred1 <- r_pred_cpp_MvT1(data     = list(Y = Y, X = X),
+                         poster     = fit1,
+                         hyperpar = list(alpha = 0.8,
+                                         phi   = 4),
+                         X_u      = X_u,
+                         d_u      = as.matrix(dist(crd_u)),
+                         d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                         R        = 1)
+tictoc::toc()
+
+
+tictoc::tic()
+pred4 <- r_pred_latent_MC2(data     = list(Y = Y, X = X),
+                           poster     = fit1,
+                           hyperpar = list(alpha = 0.8,
+                                           phi   = 4),
+                           X_u      = X_u,
+                           d_u      = as.matrix(dist(crd_u)),
+                           d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                           post = post1)
+tictoc::toc()
+
+
+tictoc::tic()
+pred2 <- r_pred_latent_MC(data     = list(Y = Y, X = X),
+                          poster     = fit1,
+                          hyperpar = list(alpha = 0.8,
+                                          phi   = 4),
+                          X_u      = X_u,
+                          d_u      = as.matrix(dist(crd_u)),
+                          d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
+                          beta = post1[[1]]$beta,
+                          sigma = post1[[1]]$sigma)
+tictoc::toc()
+
+tictoc::tic()
+pred3 <- r_pred_cpp_MvTHALF(data     = list(Y = Y, X = X),
                             poster     = fit1,
                             hyperpar = list(alpha = 0.8,
                                             phi   = 4),
                             X_u      = X_u,
                             d_u      = as.matrix(dist(crd_u)),
                             d_us     = as.matrix(dist(rbind(crd_u, crd_s))),
-                            R        = 250)
+                            R        = 1)
+tictoc::toc()
 
 ((pred1$Wu |> apply(c(1,2), mean)) - W_u)^2 |> mean() |> sqrt()
 ((pred1$Yu |> apply(c(1,2), mean)) - Y_u)^2 |> mean() |> sqrt()
+((pred2$Wu |> apply(c(1,2), mean)) - W_u)^2 |> mean() |> sqrt()
+((pred2$Yu |> apply(c(1,2), mean)) - Y_u)^2 |> mean() |> sqrt()
+((pred3$Wu |> apply(c(1,2), mean)) - W_u)^2 |> mean() |> sqrt()
+((pred3$Yu |> apply(c(1,2), mean)) - Y_u)^2 |> mean() |> sqrt()
+((pred4$Wu |> apply(c(1,2), mean)) - W_u)^2 |> mean() |> sqrt()
+((pred4$Yu |> apply(c(1,2), mean)) - Y_u)^2 |> mean() |> sqrt()
 
 
 u_set <- 1:nrow(X_u)
@@ -115,34 +154,34 @@ d_pred_latent_cppT(data     = list(Y = Y, X = X),
 # dens loocv, kcv, models, conv_opt ---------------------------------------
 
 dens_loocv_latentT(data   = list(Y = Y, X = X),
-                       priors = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                     V_r = diag(10, p),
-                                     Psi = diag(1, q),
-                                     nu = 3),
-                       coords   = crd_s,
-                       hyperpar = list(alpha = c(0.8),
-                                       phi   = c(4)))
+                   priors = list(mu_B = matrix(0, nrow = p, ncol = q),
+                                 V_r = diag(10, p),
+                                 Psi = diag(1, q),
+                                 nu = 3),
+                   coords   = crd_s,
+                   hyperpar = list(alpha = c(0.8),
+                                   phi   = c(4)))
 
 dens_kcv_latentT(data   = list(Y = Y, X = X),
-                     priors = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                   V_r = diag(10, p),
-                                   Psi = diag(1, q),
-                                   nu = 3),
-                     coords   = crd_s,
-                     hyperpar = list(alpha = c(0.8),
-                                     phi   = c(4)),
-                     K = 5)
+                 priors = list(mu_B = matrix(0, nrow = p, ncol = q),
+                               V_r = diag(10, p),
+                               Psi = diag(1, q),
+                               nu = 3),
+                 coords   = crd_s,
+                 hyperpar = list(alpha = c(0.8),
+                                 phi   = c(4)),
+                 K = 5)
 
 scores1 <- models_dens_latentT(data   = list(Y = Y, X = X),
-                                   priors = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                                 V_r = diag(10, p),
-                                                 Psi = diag(1, q),
-                                                 nu = 3),
-                                   coords   = crd_s,
-                                   hyperpar = list(alpha = c(0.8, 0.9),
-                                                   phi   = c(3, 4, 5)),
-                                   useKCV = T,
-                                   K = 5)
+                               priors = list(mu_B = matrix(0, nrow = p, ncol = q),
+                                             V_r = diag(10, p),
+                                             Psi = diag(1, q),
+                                             nu = 3),
+                               coords   = crd_s,
+                               hyperpar = list(alpha = c(0.8, 0.9),
+                                               phi   = c(3, 4, 5)),
+                               useKCV = T,
+                               K = 5)
 
 conv_opt(scores = scores1) |> round(2)
 expand_grid_cpp(c(0.8, 0.9), c(3, 4, 5))
@@ -154,14 +193,14 @@ subdata <- subset_data(data = list(Y = Y, X = X, crd = crd_s), K = 5)
 
 
 BPS_weights_MvT(data   = list(Y = Y, X = X),
-                        list(mu_B = matrix(0, nrow = p, ncol = q),
-                             V_r = diag(10, p),
-                             Psi = diag(1, q),
-                             nu = 3),
-                        coords   = crd_s,
-                        hyperpar = list(alpha = c(0.75, 0.8, 0.85),
-                                        phi   = c(3, 4, 5)),
-                        K = 5)
+                list(mu_B = matrix(0, nrow = p, ncol = q),
+                     V_r = diag(10, p),
+                     Psi = diag(1, q),
+                     nu = 3),
+                coords   = crd_s,
+                hyperpar = list(alpha = c(0.75, 0.8, 0.85),
+                                phi   = c(3, 4, 5)),
+                K = 5)
 
 fit_list <- vector(mode = "list", length = K)
 for (k in 1:K) {
@@ -170,14 +209,14 @@ for (k in 1:K) {
   crd_k <- subdata$crd_list[[k]]
 
   fit_list[[k]] <- BPS_weights_MvT(data   = data_k,
-                                           list(mu_B = matrix(0, nrow = p, ncol = q),
-                                                V_r = diag(10, p),
-                                                Psi = diag(1, q),
-                                                nu = 3),
-                                           coords   = crd_k,
-                                           hyperpar = list(alpha = c(0.75, 0.85),
-                                                           phi   = c(4)),
-                                           K = 5)
+                                   list(mu_B = matrix(0, nrow = p, ncol = q),
+                                        V_r = diag(10, p),
+                                        Psi = diag(1, q),
+                                        nu = 3),
+                                   coords   = crd_k,
+                                   hyperpar = list(alpha = c(0.75, 0.85),
+                                                   phi   = c(4)),
+                                   K = 5)
 
 
 }
@@ -188,17 +227,17 @@ BPS_combine(fit_list = fit_list, K = 5, 1)
 wbma <- BPS_PseudoBMA(fit_list = fit_list)
 
 BPS_pred_MvTT(data     = list(Y = Y, X = X),
-                     X_u      = X_u,
-                     crd_u    = crd_u,
-                     coords   = crd_s,
-                     hyperpar = list(alpha = c(0.75, 0.85),
-                                     phi   = c(4)),
-                     priors   = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                     V_r = diag(10, p),
-                                     Psi = diag(1, q),
-                                     nu = 3),
-                     W        = wbma$W_list[[1]],
-                     R        = 1)
+              X_u      = X_u,
+              crd_u    = crd_u,
+              coords   = crd_s,
+              hyperpar = list(alpha = c(0.75, 0.85),
+                              phi   = c(4)),
+              priors   = list(mu_B = matrix(0, nrow = p, ncol = q),
+                              V_r = diag(10, p),
+                              Psi = diag(1, q),
+                              nu = 3),
+              W        = wbma$W_list[[1]],
+              R        = 1)
 
 r <- 20
 predic1 <- vector(mode = "list", length = r)
@@ -211,17 +250,17 @@ while (j <= r) {
   W_k    <- wbma$W_list[[k]]
 
   predic1[[j]] <- BPS_pred_MvTT(data     = data_k,
-                                       X_u      = X_u,
-                                       crd_u    = crd_u,
-                                       coords   = crd_k,
-                                       hyperpar = list(alpha = c(0.75, 0.85),
-                                                       phi   = c(4)),
-                                       priors   = list(mu_B = matrix(0, nrow = p, ncol = q),
-                                                       V_r = diag(10, p),
-                                                       Psi = diag(1, q),
-                                                       nu = 3),
-                                       W        = W_k,
-                                       R        = 1)
+                                X_u      = X_u,
+                                crd_u    = crd_u,
+                                coords   = crd_k,
+                                hyperpar = list(alpha = c(0.75, 0.85),
+                                                phi   = c(4)),
+                                priors   = list(mu_B = matrix(0, nrow = p, ncol = q),
+                                                V_r = diag(10, p),
+                                                Psi = diag(1, q),
+                                                nu = 3),
+                                W        = W_k,
+                                R        = 1)
 
   j <- j+1
 

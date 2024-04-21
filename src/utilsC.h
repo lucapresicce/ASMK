@@ -12,4 +12,6 @@ arma::uvec sample_index(const int& size, const int& length, const arma::vec& p);
 
 Rcpp::List subset_data(const Rcpp::List& data, int K);
 
+arma::mat forceSymmetry_cpp(const arma::mat& mat);
+
 #endif // UTILSC_H
