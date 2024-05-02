@@ -8,7 +8,6 @@ This package provides the principal functions to perform accelerated meta-krigin
 
 | Folder | Description |
 | :--- | :---: |
-| `reproducibility-code` | contains simulation code & data analyses |
 | `R` | contains funtions in R |
 | `src` | contains function in Rcpp/C++ |
 
