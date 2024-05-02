@@ -66,6 +66,6 @@ Rcpp::List BPS_pred_MvT(const Rcpp::List& data, const arma::mat& X_u, const Rcpp
 
 Rcpp::List BPS_post_MvT(const Rcpp::List& data, const arma::mat& X_u, const Rcpp::List& priors, const arma::mat& coords, const arma::mat& crd_u, const Rcpp::List& hyperpar, const arma::vec& W, const int& R);
 
-Rcpp::List BPS_postdraws_MvT(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const arma::vec& W, const int& R = 1,  const bool& par = false) ;
+Rcpp::List BPS_postdraws_MvT(const Rcpp::List& data, const Rcpp::List& priors, const arma::mat& coords, const Rcpp::List& hyperpar, const arma::vec& W, const int& R = 1,  bool par = false);
 
 #endif
