@@ -6,7 +6,7 @@
 \alias{ASMK-package}
 \title{ASMK: Accelerated Spatial Meta-Kriging (ASMK)}
 \description{
-"Accelerated Meta-Kriging for massive Spatial dataset" by Luca Presicce and Sudipto Banerjee. This package provide the principal functions to perform accelerated meta-kriging.
+"This package provides the computational framework to fit the Accelerated Spatial Meta-Kriging (ASMK) approach presented and detailed in Bayesian Transfer Learning and Divide-Conquer Models for Massive Spatial Datasets of Presicce L., and Banerjee S. (2024) \doi{10.48550/arXiv.0000.0000}. The functions in the package use mostly Rcpp-armadillo implementations, offering computationally efficient Bayesian geostatistical modeling."
 }
 \author{
 \strong{Maintainer}: Luca Presicce \email{l.presicce@campus.unimib.it} (\href{https://orcid.org/0009-0005-7062-3523}{ORCID})

@@ -16,8 +16,6 @@ BPS_weights(data, priors, coords, hyperpar, K)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{K}{\link{integer} number of folds}
-
-\item{g}{\link{integer} number of draws for MC density approximations}
 }
 \value{
 \link{matrix} posterior predictive density evaluations (each columns represent a different model)

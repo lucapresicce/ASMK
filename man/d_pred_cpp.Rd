@@ -20,8 +20,6 @@ d_pred_cpp(data, X_u, Y_u, d_u, d_us, hyperpar, poster)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
-
-\item{iRphi_s}{\link{matrix} inverse of the sample correlation matrix}
 }
 \value{
 \link{vector} posterior predictive density evaluations

@@ -211,7 +211,7 @@ List fit_cpp(const List& data, const List& priors, const arma::mat& coords, cons
 //'
 //' @param poster [list] output from \code{fit_cpp} function
 //' @param R [integer] number of posterior samples
-//' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+//' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 //' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 //'
 //' @return [list] posterior samples
@@ -261,6 +261,7 @@ List post_draws(const List& poster, const int& R, const bool& par, const int& p)
 //' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 //' @param poster [list] output from \code{fit_cpp} function
+//' @param R [integer] number of posterior predictive samples
 //'
 //' @return [list] posterior predictive samples
 //'
@@ -328,6 +329,7 @@ Rcpp::List r_pred_joint(const List& data, const arma::mat& X_u, const arma::mat&
 //' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 //' @param poster [list] output from \code{fit_cpp} function
+//' @param R [integer] number of posterior predictive samples
 //'
 //' @return [list] posterior predictive samples
 //'
@@ -470,7 +472,6 @@ List r_pred_cond(const List& data, const arma::mat& X_u, const arma::mat& d_u, c
 //' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 //' @param X_u [matrix] unobserved instances covariate matrix
 //' @param Y_u [matrix] unobserved instances response matrix
-//' @param iRphi_s [matrix] inverse of the sample correlation matrix
 //' @param d_u [matrix] unobserved instances distance matrix
 //' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
@@ -671,7 +672,7 @@ arma::vec dens_kcv(const List& data, const List& priors, const arma::mat& coords
 //' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 //' @param coords [matrix] sample coordinates for X and Y
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
-//' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+//' @param useKCV if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 //' @param K [integer] number of folds
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -720,7 +721,6 @@ arma::mat models_dens(const List& data, const List& priors, const arma::mat& coo
 //' @param coords [matrix] sample coordinates for X and Y
 //' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 //' @param K [integer] number of folds
-//' @param g [integer] number of draws for MC density approximations
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 //' @export
@@ -1077,7 +1077,7 @@ List fit_cpp_MvT(const List& data, const List& priors, const arma::mat& coords, 
 //'
 //' @param poster [list] output from \code{fit_cpp} function
 //' @param R [integer] number of posterior samples
-//' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+//' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\Sigma} are sampled (\eqn{\omega} is omitted)
 //' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 //'
 //' @return [list] posterior samples
@@ -1361,8 +1361,6 @@ List r_pred_cond_MvT(const List& data, const arma::mat& X_u, const arma::mat& d_
 //' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 //' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 //' @param poster [list] output from \code{fit_cpp} function
-//' @param beta [matrix] posterior sample for \eqn{\beta}
-//' @param sigma [matrix] posterior sample for \eqn{\Sigma}
 //'
 //' @return [double] posterior predictive density evaluation
 //'
@@ -1551,7 +1549,7 @@ arma::vec dens_kcv_MvT(const List& data, const List& priors, const arma::mat& co
 //' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 //' @param coords [matrix] sample coordinates for X and Y
 //' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
-//' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+//' @param useKCV if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 //' @param K [integer] number of folds
 //'
 //' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -1757,6 +1755,7 @@ List BPS_post_MvT(const List& data, const arma::mat& X_u, const List& priors, co
 //' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 //' @param W [matrix] set of stacking weights
 //' @param R [integer] number of desired samples
+//' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\Sigma} are sampled (\eqn{\omega} is omitted)
 //'
 //' @return [matrix] BPS posterior samples
 //' @export

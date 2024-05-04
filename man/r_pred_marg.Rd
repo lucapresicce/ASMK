@@ -18,6 +18,8 @@ r_pred_marg(data, X_u, d_u, d_us, hyperpar, poster, R)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\delta}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
+
+\item{R}{\link{integer} number of posterior predictive samples}
 }
 \value{
 \link{list} posterior predictive samples

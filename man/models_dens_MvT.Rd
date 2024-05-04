@@ -15,7 +15,7 @@ models_dens_MvT(data, priors, coords, hyperpar, useKCV, K)
 
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 
-\item{useKCV}{\link{boolean} if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})}
+\item{useKCV}{if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})}
 
 \item{K}{\link{integer} number of folds}
 }

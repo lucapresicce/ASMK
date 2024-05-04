@@ -50,7 +50,7 @@ fit_cpp <- function(data, priors, coords, hyperpar) {
 #'
 #' @param poster [list] output from \code{fit_cpp} function
 #' @param R [integer] number of posterior samples
-#' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+#' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
 #' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 #'
 #' @return [list] posterior samples
@@ -67,6 +67,7 @@ post_draws <- function(poster, R, par, p) {
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
+#' @param R [integer] number of posterior predictive samples
 #'
 #' @return [list] posterior predictive samples
 #'
@@ -82,6 +83,7 @@ r_pred_joint <- function(data, X_u, d_u, d_us, hyperpar, poster, R) {
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
+#' @param R [integer] number of posterior predictive samples
 #'
 #' @return [list] posterior predictive samples
 #'
@@ -110,7 +112,6 @@ r_pred_cond <- function(data, X_u, d_u, d_us, hyperpar, poster, post) {
 #' @param data [list] two elements: first named \eqn{Y}, second named \eqn{X}
 #' @param X_u [matrix] unobserved instances covariate matrix
 #' @param Y_u [matrix] unobserved instances response matrix
-#' @param iRphi_s [matrix] inverse of the sample correlation matrix
 #' @param d_u [matrix] unobserved instances distance matrix
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
@@ -155,7 +156,7 @@ dens_kcv <- function(data, priors, coords, hyperpar, K) {
 #' @param priors [list] priors: named \eqn{\mu_b},\eqn{V_b},\eqn{a},\eqn{b}
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
-#' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+#' @param useKCV if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -171,7 +172,6 @@ models_dens <- function(data, priors, coords, hyperpar, useKCV, K) {
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param hyperpar [list] two elemets: first named \eqn{\delta}, second named \eqn{\phi}
 #' @param K [integer] number of folds
-#' @param g [integer] number of draws for MC density approximations
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
 #' @export
@@ -263,7 +263,7 @@ fit_cpp_MvT <- function(data, priors, coords, hyperpar) {
 #'
 #' @param poster [list] output from \code{fit_cpp} function
 #' @param R [integer] number of posterior samples
-#' @param par [boolean] if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)
+#' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\Sigma} are sampled (\eqn{\omega} is omitted)
 #' @param p [integer] if \code{par = TRUE}, it specifies the column number of \eqn{X}
 #'
 #' @return [list] posterior samples
@@ -329,8 +329,6 @@ r_pred_cond_MvT <- function(data, X_u, d_u, d_us, hyperpar, poster, post) {
 #' @param d_us [matrix] cross-distance between unobserved and observed instances matrix
 #' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param poster [list] output from \code{fit_cpp} function
-#' @param beta [matrix] posterior sample for \eqn{\beta}
-#' @param sigma [matrix] posterior sample for \eqn{\Sigma}
 #'
 #' @return [double] posterior predictive density evaluation
 #'
@@ -371,7 +369,7 @@ dens_kcv_MvT <- function(data, priors, coords, hyperpar, K) {
 #' @param priors [list] priors: named \eqn{\mu_B},\eqn{V_r},\eqn{\Psi},\eqn{\nu}
 #' @param coords [matrix] sample coordinates for X and Y
 #' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
-#' @param useKCV [boolean] if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
+#' @param useKCV if \code{TRUE} K-fold cross validation is used instead of LOOCV (no \code{default})
 #' @param K [integer] number of folds
 #'
 #' @return [matrix] posterior predictive density evaluations (each columns represent a different model)
@@ -436,6 +434,7 @@ BPS_post_MvT <- function(data, X_u, priors, coords, crd_u, hyperpar, W, R) {
 #' @param hyperpar [list] two elemets: first named \eqn{\alpha}, second named \eqn{\phi}
 #' @param W [matrix] set of stacking weights
 #' @param R [integer] number of desired samples
+#' @param par if \code{TRUE} only \eqn{\beta} and \eqn{\Sigma} are sampled (\eqn{\omega} is omitted)
 #'
 #' @return [matrix] BPS posterior samples
 #' @export

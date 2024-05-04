@@ -18,6 +18,8 @@ BPS_postdraws_MvT(data, priors, coords, hyperpar, W, R, par)
 \item{W}{\link{matrix} set of stacking weights}
 
 \item{R}{\link{integer} number of desired samples}
+
+\item{par}{if \code{TRUE} only \eqn{\beta} and \eqn{\Sigma} are sampled (\eqn{\omega} is omitted)}
 }
 \value{
 \link{matrix} BPS posterior samples

@@ -20,10 +20,6 @@ d_pred_cpp_MvT(data, X_u, Y_u, d_u, d_us, hyperpar, poster)
 \item{hyperpar}{\link{list} two elemets: first named \eqn{\alpha}, second named \eqn{\phi}}
 
 \item{poster}{\link{list} output from \code{fit_cpp} function}
-
-\item{beta}{\link{matrix} posterior sample for \eqn{\beta}}
-
-\item{sigma}{\link{matrix} posterior sample for \eqn{\Sigma}}
 }
 \value{
 \link{double} posterior predictive density evaluation

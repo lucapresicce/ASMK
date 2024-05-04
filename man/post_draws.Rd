@@ -11,7 +11,7 @@ post_draws(poster, R, par, p)
 
 \item{R}{\link{integer} number of posterior samples}
 
-\item{par}{\link{boolean} if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)}
+\item{par}{if \code{TRUE} only \eqn{\beta} and \eqn{\sigma^2} are sampled (\eqn{\omega} is omitted)}
 
 \item{p}{\link{integer} if \code{par = TRUE}, it specifies the column number of \eqn{X}}
 }
